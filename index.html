@@ -274,11 +274,12 @@ const teamColors = {
 
 
 
-let teams = JSON.parse(
+teams = JSON.parse(
     localStorage.getItem(
         "rankings_" + currentSeason + "_week_" + currentWeek
     )
 ) || [...defaultTeams];
+
 
 
 
