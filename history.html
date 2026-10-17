@@ -1,0 +1,613 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>NFL Rankings History</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+    <div class="site-header">
+        <img
+            src="https://commons.wikimedia.org/wiki/Special:Redirect/file/American_Football_Conference_logo.svg"
+            alt="AFC Logo"
+            class="conference-logo"
+        >
+
+        <div class="header-text">
+            <h1>NFL POWER RANKINGS</h1>
+            <p>Weekly NFL Power Rankings Builder</p>
+        </div>
+
+        <img
+            src="https://commons.wikimedia.org/wiki/Special:Redirect/file/National_Football_Conference_logo.svg"
+            alt="NFC Logo"
+            class="conference-logo"
+        >
+    </div>
+
+    <h2 class="history-page-title">RANKINGS HISTORY</h2>
+
+    <div class="history-page-container">
+
+        <div class="history-navigation">
+            <a href="index.html" class="history-back-button">
+                <i data-lucide="arrow-left"></i>
+                Back to Rankings
+            </a>
+        </div>
+
+        <div class="history-selectors">
+
+            <div class="history-selector-group">
+                <label for="historySeason">Season</label>
+                <select id="historySeason">
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                    <option value="2030">2030</option>
+                </select>
+            </div>
+
+            
+            <div class="history-selector-group">
+                <label for="historyTeam">Team</label>
+                <select id="historyTeam">
+                    <option value="">Select a team</option>
+                </select>
+                <div id="selectedTeams" class="selected-teams"></div>
+            </div>
+
+
+            <div class="history-week-filters">
+
+            <label for="historyWeekFrom">From:</label>
+            <select id="historyWeekFrom"></select>
+
+            <label for="historyWeekTo">To:</label>
+            <select id="historyWeekTo"></select>
+
+        </div>
+
+        </div>
+
+
+
+        
+
+
+        <div class="history-graph-card">
+
+            <div class="history-team-header">
+                <img id="historyTeamLogo" alt="Team Logo">
+
+                <div>
+                    <h3 id="historyTeamName">Select a Team</h3>
+                    <p id="historyTeamSubtitle">
+                        Weekly ranking history
+                    </p>
+                </div>
+            </div>
+
+            <div class="history-chart-container">
+                <canvas id="historyChart"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+    <
+<script>
+    // All 32 NFL teams
+    const nflTeams = [
+        "Arizona Cardinals",
+        "Atlanta Falcons",
+        "Baltimore Ravens",
+        "Buffalo Bills",
+        "Carolina Panthers",
+        "Chicago Bears",
+        "Cincinnati Bengals",
+        "Cleveland Browns",
+        "Dallas Cowboys",
+        "Denver Broncos",
+        "Detroit Lions",
+        "Green Bay Packers",
+        "Houston Texans",
+        "Indianapolis Colts",
+        "Jacksonville Jaguars",
+        "Kansas City Chiefs",
+        "Las Vegas Raiders",
+        "Los Angeles Chargers",
+        "Los Angeles Rams",
+        "Miami Dolphins",
+        "Minnesota Vikings",
+        "New England Patriots",
+        "New Orleans Saints",
+        "New York Giants",
+        "New York Jets",
+        "Philadelphia Eagles",
+        "Pittsburgh Steelers",
+        "San Francisco 49ers",
+        "Seattle Seahawks",
+        "Tampa Bay Buccaneers",
+        "Tennessee Titans",
+        "Washington Commanders"
+    ];
+
+    // Populate the team dropdown
+    const teamSelect = document.getElementById("historyTeam");
+
+    nflTeams.forEach(function(team) {
+        const option = document.createElement("option");
+        option.value = team;
+        option.textContent = team;
+        teamSelect.appendChild(option);
+    });
+
+    // Automatically select the current NFL season
+    const today = new Date();
+
+    let historySeason = today.getFullYear();
+
+    if (today.getMonth() < 2) {
+        historySeason--;
+    }
+
+    document.getElementById("historySeason").value =
+        String(historySeason);
+
+
+    // Rankings history chart
+    let historyChart = null;
+
+    let selectedTeams = [];
+
+
+    function displaySelectedTeams() {
+        const container = document.getElementById("selectedTeams");
+
+        container.innerHTML = "";
+
+        selectedTeams.forEach(function(team) {
+            const tag = document.createElement("span");
+            tag.className = "selected-team-tag";
+            
+            tag.textContent = team + " ";
+
+            const removeButton = document.createElement("button");
+            removeButton.textContent = "×";
+            removeButton.className = "remove-team-button";
+            removeButton.title = "Remove " + team;
+
+            removeButton.onclick = function() {
+                selectedTeams = selectedTeams.filter(t => t !== team);
+                displaySelectedTeams();
+                updateHistoryGraph();
+            };
+
+            tag.appendChild(removeButton);
+            container.appendChild(tag);
+
+        });
+    }
+
+
+
+    function updateHistoryGraph() {
+        const season = document.getElementById("historySeason").value;
+        const team = selectedTeams[0] || "";
+
+        const fromWeek = Number(document.getElementById("historyWeekFrom").value);
+        const toWeek = Number(document.getElementById("historyWeekTo").value);
+
+
+
+
+        const teamName = document.getElementById("historyTeamName");
+        const subtitle = document.getElementById("historyTeamSubtitle");
+        const logo = document.getElementById("historyTeamLogo");
+
+        if (!team) {
+            teamName.textContent = "Select a Team";
+            subtitle.textContent = "Choose a team to view its rankings";
+            logo.style.display = "none";
+
+            if (historyChart) {
+                historyChart.destroy();
+                historyChart = null;
+            }
+            return;
+        }
+
+        
+teamName.textContent = selectedTeams.length === 1
+    ? selectedTeams[0]
+    : "Team Comparison";
+
+subtitle.textContent = season + " NFL Season";
+
+
+        // Use the same ESPN team logos as the rankings page
+        const abbreviations = {
+            "Arizona Cardinals": "ari",
+            "Atlanta Falcons": "atl",
+            "Baltimore Ravens": "bal",
+            "Buffalo Bills": "buf",
+            "Carolina Panthers": "car",
+            "Chicago Bears": "chi",
+            "Cincinnati Bengals": "cin",
+            "Cleveland Browns": "cle",
+            "Dallas Cowboys": "dal",
+            "Denver Broncos": "den",
+            "Detroit Lions": "det",
+            "Green Bay Packers": "gb",
+            "Houston Texans": "hou",
+            "Indianapolis Colts": "ind",
+            "Jacksonville Jaguars": "jax",
+            "Kansas City Chiefs": "kc",
+            "Las Vegas Raiders": "lv",
+            "Los Angeles Chargers": "lac",
+            "Los Angeles Rams": "lar",
+            "Miami Dolphins": "mia",
+            "Minnesota Vikings": "min",
+            "New England Patriots": "ne",
+            "New Orleans Saints": "no",
+            "New York Giants": "nyg",
+            "New York Jets": "nyj",
+            "Philadelphia Eagles": "phi",
+            "Pittsburgh Steelers": "pit",
+            "San Francisco 49ers": "sf",
+            "Seattle Seahawks": "sea",
+            "Tampa Bay Buccaneers": "tb",
+            "Tennessee Titans": "ten",
+            "Washington Commanders": "wsh"
+        };
+
+        
+        logo.src = team === "Los Angeles Rams"
+            ? "rams-logo.png"
+            : "https://a.espncdn.com/i/teamlogos/nfl/500/" +
+            abbreviations[team] + ".png";
+
+if (team === "New York Giants") {
+    logo.src = "New_York_Giants_logo.svg";
+}
+
+
+        
+if (selectedTeams.length > 1) {
+    logo.src = "https://a.espncdn.com/i/teamlogos/leagues/500/nfl.png";
+}
+
+logo.style.display = selectedTeams.length > 0 ? "block" : "none";
+
+
+        logo.style.filter = team === "New York Giants"
+            ? "drop-shadow(1px 0 0 #A71930) drop-shadow(-1px 0 0 #A71930) drop-shadow(0 1px 0 #A71930) drop-shadow(0 -1px 0 #A71930)"
+            : "none";
+
+
+        // Read the selected team's ranking for each saved week
+        const rankingsData = [];
+
+        
+        for (let week = fromWeek; week <= toWeek; week++) {
+
+            const key = "rankings_" + season + "_week_" + week;
+            const saved = localStorage.getItem(key);
+
+            if (!saved) continue;
+
+            try {
+                const rankings = JSON.parse(saved);
+                const position = rankings.indexOf(team);
+
+                if (position !== -1) {
+                    rankingsData.push({
+                        x: week,
+                        y: position + 1
+                    });
+                }
+            } catch (error) {
+                console.error("Could not read " + key, error);
+            }
+        }
+
+
+
+    // Team colors for the rankings history graph
+    const teamColors = {
+        "Arizona Cardinals": "#97233F",
+        "Atlanta Falcons": "#A71930",
+        "Baltimore Ravens": "#6F2C91",
+        "Buffalo Bills": "#00338D",
+        "Carolina Panthers": "#0085CA",
+        "Chicago Bears": "#C83803",
+        "Cincinnati Bengals": "#FB4F14",
+        "Cleveland Browns": "#FF3C00",
+        "Dallas Cowboys": "#869397",
+        "Denver Broncos": "#FB4F14",
+        "Detroit Lions": "#0076B6",
+        "Green Bay Packers": "#FFB612",
+        "Houston Texans": "#A71930",
+        "Indianapolis Colts": "#4DA6FF",
+        "Jacksonville Jaguars": "#00A6A6",
+        "Kansas City Chiefs": "#E31837",
+        "Las Vegas Raiders": "#A5ACAF",
+        "Los Angeles Chargers": "#0080C6",
+        "Los Angeles Rams": "#FFA300",
+        "Miami Dolphins": "#008E97",
+        "Minnesota Vikings": "#4F2683",
+        "New England Patriots": "#C60C30",
+        "New Orleans Saints": "#D3BC8D",
+        "New York Giants": "#A71930",
+        "New York Jets": "#125740",
+        "Philadelphia Eagles": "#004C54",
+        "Pittsburgh Steelers": "#FFB612",
+        "San Francisco 49ers": "#AA0000",
+        "Seattle Seahawks": "#69BE28",
+        "Tampa Bay Buccaneers": "#D50A0A",
+        "Tennessee Titans": "#4B92DB",
+        "Washington Commanders": "#FFB612"
+    };
+
+    const graphColor = teamColors[team] || "#60a5fa";
+
+
+
+
+
+        // Remove the old graph before drawing a new one
+        if (historyChart) {
+            historyChart.destroy();
+        }
+
+
+
+
+
+
+
+
+        const canvas = document.getElementById("historyChart");
+
+
+
+        const graphLogo = new Image();
+        graphLogo.src = logo.src;
+
+    
+
+
+
+        graphLogo.width = 24;
+        graphLogo.height = team === "Los Angeles Rams" ? 16 : 24;
+
+
+
+        graphLogo.onload = function() {
+            if (historyChart) {
+                historyChart.update();
+            }
+        };
+
+
+
+
+const datasets = [];
+
+
+selectedTeams.forEach(function(selectedTeam) {
+    const teamRankings = [];
+
+
+const teamLogo = new Image();
+
+teamLogo.src = selectedTeam === "Los Angeles Rams"
+    ? "rams-logo.png"
+    : selectedTeam === "New York Giants"
+    ? "New_York_Giants_logo.svg"
+    : "https://a.espncdn.com/i/teamlogos/nfl/500/" +
+      abbreviations[selectedTeam] + ".png";
+
+teamLogo.width = 24;
+teamLogo.height = selectedTeam === "Los Angeles Rams" ? 16 : 24;
+
+teamLogo.onload = function() {
+    if (historyChart) {
+        historyChart.update();
+    }
+};
+
+
+    for (let week = fromWeek; week <= toWeek; week++) {
+        const key = "rankings_" + season + "_week_" + week;
+        const saved = localStorage.getItem(key);
+
+        if (!saved) continue;
+
+        try {
+            const rankings = JSON.parse(saved);
+            const position = rankings.indexOf(selectedTeam);
+
+            if (position !== -1) {
+                teamRankings.push({
+                    x: week,
+                    y: position + 1
+                });
+            }
+        } catch (error) {
+            console.error("Could not read " + key, error);
+        }
+    }
+
+    
+datasets.push({
+    label: selectedTeam,
+    data: teamRankings,
+    borderColor: teamColors[selectedTeam] || "#60a5fa",
+    backgroundColor: teamColors[selectedTeam] || "#60a5fa",
+    borderWidth: 3,
+    
+pointStyle: teamLogo,
+pointRadius: selectedTeam === "Los Angeles Rams" ? 9 : 12,
+pointHoverRadius: selectedTeam === "Los Angeles Rams" ? 12 : 15,
+
+    tension: 0.2,
+    spanGaps: false
+});
+
+    });
+
+
+
+        historyChart = new Chart(canvas, {
+            type: "line",
+            
+            data: {
+                datasets: datasets
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                parsing: false,
+                scales: {
+                    
+                    x: {
+                        type: "linear",
+                        min: fromWeek,
+                        max: toWeek === fromWeek ? fromWeek + 1 : toWeek,
+
+                        ticks: {
+                            stepSize: 1,
+                            color: "#cbd5e1",
+                            callback: value => "W" + value
+                        },
+                        grid: {
+                            color: "#2b405b"
+                        },
+                        title: {
+                            display: true,
+                            text: "Week",
+                            color: "#e2e8f0"
+                        }
+                    },
+                    y: {
+                        reverse: true,
+                        min: 1,
+                        max: 32,
+                        ticks: {
+                            stepSize: 1,
+                            color: "#cbd5e1"
+                        },
+                        grid: {
+                            color: "#2b405b"
+                        },
+                        title: {
+                            display: true,
+                            text: "Ranking",
+                            color: "#e2e8f0"
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: items => "Week " + items[0].parsed.x,
+                            label: item => "Rank #" + item.parsed.y
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+    // Set up the week range dropdowns
+    const weekFromSelect = document.getElementById("historyWeekFrom");
+    const weekToSelect = document.getElementById("historyWeekTo");
+
+    for (let week = 1; week <= 18; week++) {
+        const fromOption = document.createElement("option");
+        fromOption.value = week;
+        fromOption.textContent = "Week " + week;
+        weekFromSelect.appendChild(fromOption);
+
+        const toOption = document.createElement("option");
+        toOption.value = week;
+        toOption.textContent = "Week " + week;
+        weekToSelect.appendChild(toOption);
+    }
+
+    // Default to Weeks 1–6 for now
+    weekFromSelect.value = "1";
+    weekToSelect.value = "18";
+
+    // Update the graph when the selected range changes
+    weekFromSelect.addEventListener("change", function() {
+        if (Number(weekFromSelect.value) > Number(weekToSelect.value)) {
+            weekToSelect.value = weekFromSelect.value;
+        }
+
+        updateHistoryGraph();
+    });
+
+    weekToSelect.addEventListener("change", function() {
+        if (Number(weekToSelect.value) < Number(weekFromSelect.value)) {
+            weekFromSelect.value = weekToSelect.value;
+        }
+
+        updateHistoryGraph();
+    });
+
+
+
+    
+    document.getElementById("historyTeam")
+        .addEventListener("change", function() {
+
+            const team = this.value;
+
+            if (team && !selectedTeams.includes(team)) {
+                selectedTeams.push(team);
+            }
+
+            // Reset dropdown so another team can be selected
+            this.value = "";
+
+            displaySelectedTeams();
+            updateHistoryGraph();
+        });
+
+
+    document.getElementById("historySeason")
+        .addEventListener("change", updateHistoryGraph);
+
+    // Initialize the graph area
+    updateHistoryGraph();
+
+    // Initialize toolbar icons
+    lucide.createIcons();
+</script>
+
+
+</body>
+</html>

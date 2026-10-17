@@ -1,0 +1,1630 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NFL Power Rankings</title>
+    <link rel="stylesheet" href="style.css">
+     <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+    
+<div class="site-header">
+
+    <img
+        src="https://commons.wikimedia.org/wiki/Special:Redirect/file/American_Football_Conference_logo.svg"
+        alt="AFC Logo"
+        class="conference-logo"
+    >
+
+    <div class="header-text">
+        <h1>NFL POWER RANKINGS</h1>
+        <p>Weekly NFL Power Rankings Builder</p>
+    </div>
+
+    <img
+        src="https://commons.wikimedia.org/wiki/Special:Redirect/file/National_Football_Conference_logo.svg"
+        alt="NFC Logo"
+        class="conference-logo"
+    >
+
+</div>
+
+
+
+<div class="season-week-header">
+    <h2 id="weekTitle">Week 1 Rankings</h2>
+</div>
+
+
+
+
+
+
+
+
+<div class="controls-container">
+
+
+    <select id="seasonSelect" onchange="changeSeason()">
+        <option value="2026">2026</option>
+        <option value="2027">2027</option>
+        <option value="2028">2028</option>
+        <option value="2029">2029</option>
+        <option value="2030">2030</option>
+    </select>
+
+    <span class="toolbar-divider"></span>
+
+    <button onclick="previousWeek()" title="Previous Week">
+        <i data-lucide="chevron-left"></i>
+    </button>
+
+    <button onclick="nextWeek()" title="Next Week">
+        <i data-lucide="chevron-right"></i>
+    </button>
+
+    <span class="toolbar-divider"></span>
+
+    <button onclick="copyPreviousWeek()" title="Copy Previous Week's Rankings">
+        <i data-lucide="copy"></i>
+        Copy Last Week
+    </button>
+
+    <button onclick="sortAlphabetically()" title="Sort Alphabetically">
+        <i data-lucide="arrow-down-a-z"></i>
+        A–Z
+    </button>
+
+    <button onclick="generateGraphic()" title="Generate Graphic">
+        <i data-lucide="image"></i>
+        Graphic
+    </button>
+
+
+<button onclick="window.location.href='history.html'"
+        title="View Rankings History">
+    <i data-lucide="chart-no-axes-combined"></i>
+    History
+</button>
+
+
+    <span class="toolbar-divider"></span>
+
+    <button onclick="downloadBackup()" title="Download Backup">
+        <i data-lucide="download"></i>
+        Backup
+    </button>
+
+    <button onclick="document.getElementById('backupFileInput').click()"
+            title="Restore Backup">
+        <i data-lucide="upload"></i>
+        Restore
+    </button>
+
+</div>
+
+
+
+
+
+<input
+    type="file"
+    id="backupFileInput"
+    accept=".json,application/json"
+    style="display: none;"
+    onchange="restoreBackup(event)"
+>
+
+<div id="rankings"></div>
+
+
+<script>
+
+
+
+const today = new Date();
+
+let currentSeason = today.getFullYear();
+
+// January and February belong to the previous NFL season
+if (today.getMonth() === 0 || today.getMonth() === 1) {
+    currentSeason--;
+}
+
+let currentWeek = Number(localStorage.getItem("currentWeek")) || 1;
+
+
+function migrate2026Rankings() {
+    for (let week = 1; week <= 18; week++) {
+        const oldKey = "rankings_week_" + week;
+        const newKey = "rankings_2026_week_" + week;
+
+        const oldRankings = localStorage.getItem(oldKey);
+        const newRankings = localStorage.getItem(newKey);
+
+        // Copy old rankings only if the new key doesn't exist.
+        if (oldRankings !== null && newRankings === null) {
+            localStorage.setItem(newKey, oldRankings);
+        }
+    }
+}
+
+// Copy existing rankings into the 2026 season.
+migrate2026Rankings();
+   
+
+
+const defaultTeams = [
+    "Arizona Cardinals",
+    "Atlanta Falcons",
+    "Baltimore Ravens",
+    "Buffalo Bills",
+    "Carolina Panthers",
+    "Chicago Bears",
+    "Cincinnati Bengals",
+    "Cleveland Browns",
+    "Dallas Cowboys",
+    "Denver Broncos",
+    "Detroit Lions",
+    "Green Bay Packers",
+    "Houston Texans",
+    "Indianapolis Colts",
+    "Jacksonville Jaguars",
+    "Kansas City Chiefs",
+    "Las Vegas Raiders",
+    "Los Angeles Chargers",
+    "Los Angeles Rams",
+    "Miami Dolphins",
+    "Minnesota Vikings",
+    "New England Patriots",
+    "New Orleans Saints",
+    "New York Giants",
+    "New York Jets",
+    "Philadelphia Eagles",
+    "Pittsburgh Steelers",
+    "San Francisco 49ers",
+    "Seattle Seahawks",
+    "Tampa Bay Buccaneers",
+    "Tennessee Titans",
+    "Washington Commanders"
+];
+
+const teamAbbreviations = {
+    "Arizona Cardinals": "ari",
+    "Atlanta Falcons": "atl",
+    "Baltimore Ravens": "bal",
+    "Buffalo Bills": "buf",
+    "Carolina Panthers": "car",
+    "Chicago Bears": "chi",
+    "Cincinnati Bengals": "cin",
+    "Cleveland Browns": "cle",
+    "Dallas Cowboys": "dal",
+    "Denver Broncos": "den",
+    "Detroit Lions": "det",
+    "Green Bay Packers": "gb",
+    "Houston Texans": "hou",
+    "Indianapolis Colts": "ind",
+    "Jacksonville Jaguars": "jax",
+    "Kansas City Chiefs": "kc",
+    "Las Vegas Raiders": "lv",
+    "Los Angeles Chargers": "lac",
+    "Los Angeles Rams": "lar",
+    "Miami Dolphins": "mia",
+    "Minnesota Vikings": "min",
+    "New England Patriots": "ne",
+    "New Orleans Saints": "no",
+    "New York Giants": "nyg",
+    "New York Jets": "nyj",
+    "Philadelphia Eagles": "phi",
+    "Pittsburgh Steelers": "pit",
+    "San Francisco 49ers": "sf",
+    "Seattle Seahawks": "sea",
+    "Tampa Bay Buccaneers": "tb",
+    "Tennessee Titans": "ten",
+    "Washington Commanders": "wsh"
+};
+
+const teamColors = {
+    "Arizona Cardinals": "#97233F",
+    "Atlanta Falcons": "#A71930",
+    "Baltimore Ravens": "#241773",
+    "Buffalo Bills": "#00338D",
+    "Carolina Panthers": "#0085CA",
+    "Chicago Bears": "#0B162A",
+    "Cincinnati Bengals": "#FB4F14",
+    "Cleveland Browns": "#311D00",
+    "Dallas Cowboys": "#003594",
+    "Denver Broncos": "#FB4F14",
+    "Detroit Lions": "#0076B6",
+    "Green Bay Packers": "#203731",
+    "Houston Texans": "#03202F",
+    "Indianapolis Colts": "#002C5F",
+    "Jacksonville Jaguars": "#006778",
+    "Kansas City Chiefs": "#E31837",
+    "Las Vegas Raiders": "#000000",
+    "Los Angeles Chargers": "#0080C6",
+    "Los Angeles Rams": "#FFD100",
+    "Miami Dolphins": "#008E97",
+    "Minnesota Vikings": "#4F2683",
+    "New England Patriots": "#002244",
+    "New Orleans Saints": "#D3BC8D",
+    "New York Giants": "#A71930",
+    "New York Jets": "#FFFFFF",
+    "Philadelphia Eagles": "#004C54",
+    "Pittsburgh Steelers": "#FFB612",
+    "San Francisco 49ers": "#AA0000",
+    "Seattle Seahawks": "#002244",
+    "Tampa Bay Buccaneers": "#D50A0A",
+    "Tennessee Titans": "#0C2340",
+    "Washington Commanders": "#5A1414"
+};
+
+
+
+
+
+
+
+
+let teams = JSON.parse(
+    localStorage.getItem(
+        "rankings_" + currentSeason + "_week_" + currentWeek
+    )
+) || [...defaultTeams];
+
+
+
+
+
+
+
+function displayRankings() {
+    let rankingsDiv = document.getElementById("rankings");
+    rankingsDiv.innerHTML = "";
+
+    teams.forEach(function(team, index) {
+        let change = getRankChange(team, index + 1);
+        let changeDisplay = "";
+
+        if (change > 0) {
+            changeDisplay = `<span style="color: green;">▲ ${change}</span>`;
+        } else if (change < 0) {
+            changeDisplay = `<span style="color: red;">▼ ${Math.abs(change)}</span>`;
+        } else if (change === 0) {
+            changeDisplay = `<span style="color: gray;">—</span>`;
+        }
+
+        // Get the team's official color
+        const teamColor = teamColors[team] || "#4b6b97";
+
+        rankingsDiv.innerHTML += `
+            <p class="ranking-card"
+               draggable="true"
+               data-index="${index}"
+               style="display: flex; align-items: center; gap: 12px;
+                      border-left-color: ${teamColor};">
+
+                <strong>${index + 1}.</strong>
+
+                <img
+                    
+                    src="${team === 'Los Angeles Rams' ? 'rams-logo.png' : `https://a.espncdn.com/i/teamlogos/nfl/500/${teamAbbreviations[team]}.png`}"
+                    alt="${team} logo"
+                    width="40"
+                    height="40"
+                    draggable="false"
+                    style="object-fit: contain; filter: ${team === 'New York Giants' ? 'drop-shadow(1px 0 0 #A71930) drop-shadow(-1px 0 0 #A71930) drop-shadow(0 1px 0 #A71930) drop-shadow(0 -1px 0 #A71930)' : 'none'};"
+
+                >
+
+                <span style="width: 200px;">${team}</span>
+
+                ${changeDisplay}
+
+                <button onclick="moveUp(${index})">↑</button>
+                <button onclick="moveDown(${index})">↓</button>
+            </p>
+        `;
+    });
+
+    setupDragAndDrop();
+}
+
+    
+
+
+
+
+
+
+
+function setupDragAndDrop() {
+    const rankingsDiv = document.getElementById("rankings");
+    const cards = rankingsDiv.querySelectorAll(".ranking-card");
+
+    let draggedIndex = null;
+    let insertIndex = null;
+    let pointerY = null;
+    let scrollFrame = null;
+
+    const indicator = document.createElement("div");
+    indicator.className = "drop-indicator";
+
+    // Auto-scroll settings
+    const scrollZone = 110;
+    const maxScrollSpeed = 20;
+
+    function updateIndicator(clientY) {
+        if (draggedIndex === null) return;
+
+        const visibleCards = Array.from(cards);
+
+        // Find where the dragged team should be inserted
+        let targetCard = null;
+
+        for (const card of visibleCards) {
+            const rect = card.getBoundingClientRect();
+            const midpoint = rect.top + rect.height / 2;
+
+            if (clientY < midpoint) {
+                targetCard = card;
+                break;
+            }
+        }
+
+        if (targetCard) {
+            insertIndex = Number(targetCard.dataset.index);
+            rankingsDiv.insertBefore(indicator, targetCard);
+        } else {
+            insertIndex = teams.length;
+            rankingsDiv.appendChild(indicator);
+        }
+    }
+
+    function autoScroll() {
+        if (draggedIndex === null) {
+            scrollFrame = null;
+            return;
+        }
+
+        if (pointerY !== null) {
+            const viewportHeight = window.innerHeight;
+            let scrollAmount = 0;
+
+            if (pointerY < scrollZone) {
+                const intensity =
+                    (scrollZone - Math.max(0, pointerY)) / scrollZone;
+
+                scrollAmount = -maxScrollSpeed * intensity;
+
+            } else if (pointerY > viewportHeight - scrollZone) {
+                const intensity =
+                    (pointerY - (viewportHeight - scrollZone)) / scrollZone;
+
+                scrollAmount = maxScrollSpeed * intensity;
+            }
+
+            if (scrollAmount !== 0) {
+                window.scrollBy(0, scrollAmount);
+                updateIndicator(pointerY);
+            }
+        }
+
+        scrollFrame = requestAnimationFrame(autoScroll);
+    }
+
+    function finishDrop() {
+        if (draggedIndex === null || insertIndex === null) return;
+
+        const movedTeam = teams.splice(draggedIndex, 1)[0];
+
+        const finalIndex =
+            insertIndex > draggedIndex
+                ? insertIndex - 1
+                : insertIndex;
+
+        teams.splice(finalIndex, 0, movedTeam);
+
+        cleanupDrag();
+
+        saveRankings();
+        displayRankings();
+    }
+
+    function cleanupDrag() {
+        indicator.remove();
+
+        cards.forEach(function(card) {
+            card.classList.remove("dragging");
+        });
+
+        draggedIndex = null;
+        insertIndex = null;
+        pointerY = null;
+
+        if (scrollFrame !== null) {
+            cancelAnimationFrame(scrollFrame);
+            scrollFrame = null;
+        }
+    }
+
+    cards.forEach(function(card) {
+        card.addEventListener("dragstart", function(event) {
+            draggedIndex = Number(card.dataset.index);
+            insertIndex = draggedIndex;
+            pointerY = null;
+
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData(
+                "text/plain",
+                String(draggedIndex)
+            );
+
+            card.classList.add("dragging");
+
+            if (scrollFrame === null) {
+                scrollFrame = requestAnimationFrame(autoScroll);
+            }
+        });
+
+        card.addEventListener("dragover", function(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+
+            pointerY = event.clientY;
+            updateIndicator(pointerY);
+        });
+
+        card.addEventListener("drop", function(event) {
+            event.preventDefault();
+            finishDrop();
+        });
+
+        card.addEventListener("dragend", function() {
+            cleanupDrag();
+        });
+    });
+
+    // Allow drops in the ranking list, including on the indicator
+    rankingsDiv.addEventListener("dragover", function(event) {
+        if (draggedIndex === null) return;
+
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+
+        pointerY = event.clientY;
+        updateIndicator(pointerY);
+    });
+
+    rankingsDiv.addEventListener("drop", function(event) {
+        if (draggedIndex === null) return;
+
+        event.preventDefault();
+        finishDrop();
+    });
+}
+
+
+
+        
+
+
+
+    function moveUp(index) {
+        if (index === 0) return;
+
+        [teams[index - 1], teams[index]] =
+            [teams[index], teams[index - 1]];
+
+        saveRankings();
+        displayRankings();
+    }
+
+    function moveDown(index) {
+        if (index === teams.length - 1) return;
+
+        [teams[index + 1], teams[index]] =
+            [teams[index], teams[index + 1]];
+
+        saveRankings();
+        displayRankings();
+    }
+
+
+
+
+function getRankChange(team, currentRank) {
+    if (currentWeek === 1) return null;
+
+    const previousWeekKey =
+        "rankings_" + currentSeason + "_week_" + (currentWeek - 1);
+
+    const previousRankings = JSON.parse(
+        localStorage.getItem(previousWeekKey)
+    );
+
+    if (!previousRankings) return null;
+
+    const previousRank = previousRankings.indexOf(team) + 1;
+
+    if (previousRank === 0) return null;
+
+    return previousRank - currentRank;
+}
+
+
+
+
+
+function updateAllWeeks() {
+    // Find all seasons that have saved rankings
+    const seasons = new Set([currentSeason]);
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const match = key.match(/^rankings_(\d{4})_week_(\d{1,2})$/);
+
+        if (match) {
+            seasons.add(Number(match[1]));
+        }
+    }
+
+    // Check saved rankings for every season
+    seasons.forEach(function(season) {
+        for (let week = 1; week <= 18; week++) {
+            const key = "rankings_" + season + "_week_" + week;
+            const saved = localStorage.getItem(key);
+
+            if (saved) {
+                const weekTeams = JSON.parse(saved);
+
+                // Add any missing NFL teams
+                defaultTeams.forEach(function(team) {
+                    if (!weekTeams.includes(team)) {
+                        weekTeams.push(team);
+                    }
+                });
+
+                localStorage.setItem(key, JSON.stringify(weekTeams));
+            }
+        }
+    });
+}
+
+
+
+
+function saveRankings() {
+    const key = "rankings_" + currentSeason + "_week_" + currentWeek;
+    localStorage.setItem(key, JSON.stringify(teams));
+}
+
+
+
+
+function downloadBackup() {
+    // Save the current week's rankings first
+    saveRankings();
+
+    const backup = {
+        type: "nfl-power-rankings-backup",
+        version: 2,
+        currentSeason: currentSeason,
+        currentWeek: currentWeek,
+        savedAt: new Date().toISOString(),
+        seasons: {}
+    };
+
+    // Collect rankings from every saved season
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+
+        // Find keys such as rankings_2026_week_7
+        const match = key.match(/^rankings_(\d{4})_week_(\d{1,2})$/);
+
+        if (!match) continue;
+
+        const season = match[1];
+        const week = Number(match[2]);
+
+        if (week < 1 || week > 18) continue;
+
+        if (!backup.seasons[season]) {
+            backup.seasons[season] = {};
+        }
+
+        backup.seasons[season][week] = JSON.parse(
+            localStorage.getItem(key)
+        );
+    }
+
+    // Create the backup file
+    const json = JSON.stringify(backup, null, 2);
+
+    const blob = new Blob([json], {
+        type: "application/json"
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    // Include the date and time in the filename
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+
+    link.href = url;
+
+    link.download =
+        `NFL-Power-Rankings-All-Seasons-Backup-${year}-${month}-${day}-${hours}${minutes}.json`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(function() {
+        URL.revokeObjectURL(url);
+    }, 1000);
+}
+
+
+
+
+async function restoreBackup(event) {
+    const input = event.target;
+    const file = input.files[0];
+
+    if (!file) return;
+
+    try {
+        const contents = await file.text();
+        const backup = JSON.parse(contents);
+
+        if (
+            !backup ||
+            backup.type !== "nfl-power-rankings-backup" ||
+            ![1, 2].includes(backup.version)
+        ) {
+            throw new Error("This is not a valid NFL Power Rankings backup.");
+        }
+
+        
+        let restoredSeasons = {};
+        let restoredSeason;
+        let restoredWeek;
+
+        if (backup.version === 1) {
+            // Older backups contain only 2026 rankings.
+            restoredSeasons["2026"] = backup.rankings;
+            restoredSeason = 2026;
+            restoredWeek = backup.currentWeek;
+        } else {
+            // New backups contain multiple seasons.
+            restoredSeasons = backup.seasons;
+            restoredSeason = Number(backup.currentSeason);
+            restoredWeek = backup.currentWeek;
+        }
+
+        if (
+            !Number.isInteger(restoredSeason) ||
+            restoredSeason < 2000 ||
+            restoredSeason > 2100 ||
+            !Number.isInteger(restoredWeek) ||
+            restoredWeek < 1 ||
+            restoredWeek > 18 ||
+            !restoredSeasons ||
+            typeof restoredSeasons !== "object" ||
+            Array.isArray(restoredSeasons)
+        ) {
+            throw new Error("The backup contains invalid season information.");
+        }
+
+        const validatedData = {};
+        let totalWeeks = 0;
+
+        // Validate every season and week before changing saved data.
+        for (const season in restoredSeasons) {
+            if (
+                !/^\d{4}$/.test(season) ||
+                Number(season) < 2000 ||
+                Number(season) > 2100
+            ) {
+                throw new Error("Invalid season found: " + season);
+            }
+
+            const seasonData = restoredSeasons[season];
+
+            if (
+                !seasonData ||
+                typeof seasonData !== "object" ||
+                Array.isArray(seasonData)
+            ) {
+                throw new Error("Invalid data for season " + season);
+            }
+
+            for (const week in seasonData) {
+                const weekNumber = Number(week);
+
+                if (
+                    !Number.isInteger(weekNumber) ||
+                    weekNumber < 1 ||
+                    weekNumber > 18 ||
+                    String(weekNumber) !== week
+                ) {
+                    throw new Error("Invalid week found in backup.");
+                }
+
+                const rankings = seasonData[week];
+
+                const valid =
+                    Array.isArray(rankings) &&
+                    rankings.length === defaultTeams.length &&
+                    new Set(rankings).size === defaultTeams.length &&
+                    rankings.every(team => defaultTeams.includes(team));
+
+                if (!valid) {
+                    throw new Error(
+                        "Invalid rankings for " +
+                        season + " Week " + week
+                    );
+                }
+
+                const key =
+                    "rankings_" + season + "_week_" + week;
+
+                validatedData[key] = JSON.stringify(rankings);
+                totalWeeks++;
+            }
+        }
+
+        if (totalWeeks === 0) {
+            throw new Error("The backup contains no saved rankings.");
+        }
+
+        const confirmed = confirm(
+            "Restore this backup?\n\n" +
+            "This contains " + totalWeeks +
+            " saved weeks across " +
+            Object.keys(restoredSeasons).length +
+            " season(s).\n\n" +
+            "Restoring will replace your current saved rankings. " +
+            "Download a backup of your current data first if needed."
+        );
+
+        if (!confirmed) return;
+
+        // Identify existing season-specific ranking keys.
+        const existingKeys = [];
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+
+            if (/^rankings_\d{4}_week_\d{1,2}$/.test(key)) {
+                existingKeys.push(key);
+            }
+        }
+
+        // Save a temporary snapshot so failed restores can roll back.
+        const snapshot = {};
+
+        existingKeys.forEach(key => {
+            snapshot[key] = localStorage.getItem(key);
+        });
+
+        const oldSeason = localStorage.getItem("currentSeason");
+        const oldWeek = localStorage.getItem("currentWeek");
+
+        try {
+            existingKeys.forEach(key => {
+                localStorage.removeItem(key);
+            });
+
+            for (const key in validatedData) {
+                localStorage.setItem(key, validatedData[key]);
+            }
+
+            localStorage.setItem("currentSeason", String(restoredSeason));
+            localStorage.setItem("currentWeek", String(restoredWeek));
+
+        } catch (storageError) {
+            // Restore previous values if saving fails.
+            for (const key in validatedData) {
+                localStorage.removeItem(key);
+            }
+
+            for (const key in snapshot) {
+                localStorage.setItem(key, snapshot[key]);
+            }
+
+            if (oldSeason === null) {
+                localStorage.removeItem("currentSeason");
+            } else {
+                localStorage.setItem("currentSeason", oldSeason);
+            }
+
+            if (oldWeek === null) {
+                localStorage.removeItem("currentWeek");
+            } else {
+                localStorage.setItem("currentWeek", oldWeek);
+            }
+
+            throw storageError;
+        }
+
+        // Load the restored season and week.
+        currentSeason = restoredSeason;
+        currentWeek = restoredWeek;
+
+        const currentKey =
+            "rankings_" + currentSeason + "_week_" + currentWeek;
+
+        teams = localStorage.getItem(currentKey)
+            ? JSON.parse(localStorage.getItem(currentKey))
+            : [...defaultTeams];
+
+        document.getElementById("seasonSelect").value =
+            String(currentSeason);
+
+        document.getElementById("weekTitle").textContent =
+            "Week " + currentWeek + " Rankings";
+
+        displayRankings();
+
+        alert("Backup restored successfully!");
+
+    } catch (error) {
+        console.error(error);
+        alert("Could not restore backup: " + error.message);
+
+    } finally {
+        // Allow the same file to be selected again.
+        input.value = "";
+    }
+}
+
+
+
+
+
+function nextWeek() {
+    if (currentWeek === 18) return;
+
+    saveRankings();
+
+    currentWeek++;
+    localStorage.setItem("currentWeek", currentWeek);
+
+    const key = "rankings_" + currentSeason + "_week_" + currentWeek;
+    const savedWeek = localStorage.getItem(key);
+
+    if (savedWeek) {
+        teams = JSON.parse(savedWeek);
+    } else {
+        // Start a new week using the previous week's order
+        saveRankings();
+    }
+
+    document.getElementById("weekTitle").textContent =
+        "Week " + currentWeek + " Rankings";
+
+    displayRankings();
+}
+
+function previousWeek() {
+    if (currentWeek === 1) return;
+
+    saveRankings();
+
+    currentWeek--;
+    localStorage.setItem("currentWeek", currentWeek);
+
+    const key = "rankings_" + currentSeason + "_week_" + currentWeek;
+    const savedWeek = localStorage.getItem(key);
+
+    if (savedWeek) {
+        teams = JSON.parse(savedWeek);
+    } else {
+        teams = [...defaultTeams];
+    }
+
+    document.getElementById("weekTitle").textContent =
+        "Week " + currentWeek + " Rankings";
+
+    displayRankings();
+}
+
+
+
+
+function copyPreviousWeek() {
+    if (currentWeek === 1) {
+        alert("Week 1 does not have a previous week to copy.");
+        return;
+    }
+
+    const previousWeekKey =
+        "rankings_" + currentSeason + "_week_" + (currentWeek - 1);
+
+    const previousRankings = localStorage.getItem(previousWeekKey);
+
+    if (!previousRankings) {
+        alert("No saved rankings found for the previous week.");
+        return;
+    }
+
+    const confirmed = confirm(
+        "Copy Week " + (currentWeek - 1) +
+        " of the " + currentSeason + " season into Week " +
+        currentWeek + "?\n\nThis will replace your current rankings."
+    );
+
+    if (!confirmed) return;
+
+    teams = JSON.parse(previousRankings);
+
+    saveRankings();
+    displayRankings();
+}
+
+
+
+function changeSeason() {
+    const selectedSeason = Number(
+        document.getElementById("seasonSelect").value
+    );
+
+    if (selectedSeason === currentSeason) return;
+
+    // Save the current season's rankings before switching
+    saveRankings();
+
+    // Switch to the selected season
+    currentSeason = selectedSeason;
+    localStorage.setItem("currentSeason", currentSeason);
+
+    // Start at Week 1 of the selected season
+    currentWeek = 1;
+    localStorage.setItem("currentWeek", currentWeek);
+
+    // Load existing rankings or start with alphabetical order
+    const key = "rankings_" + currentSeason + "_week_1";
+    const savedRankings = localStorage.getItem(key);
+
+    teams = savedRankings
+        ? JSON.parse(savedRankings)
+        : [...defaultTeams];
+
+    document.getElementById("weekTitle").textContent =
+        "Week 1 Rankings";
+
+    displayRankings();
+}
+
+
+
+function sortAlphabetically() {
+    const confirmed = confirm(
+        "Sort Week " + currentWeek +
+        " alphabetically (A–Z)?\n\n" +
+        "This will replace your current ranking order."
+    );
+
+    if (!confirmed) return;
+
+    // Sort teams alphabetically by name
+    teams.sort((a, b) => a.localeCompare(b));
+
+    // Automatically save the new ranking order
+    saveRankings();
+
+    // Update the displayed rankings
+    displayRankings();
+}
+
+
+
+document.getElementById("weekTitle").textContent =
+    "Week " + currentWeek + " Rankings";
+
+    
+updateAllWeeks();
+
+teams = JSON.parse(
+    localStorage.getItem("rankings_week_" + currentWeek)
+) || [...defaultTeams];
+
+function getContrastTextColor(hexColor) {
+    hexColor = hexColor.replace("#", "");
+
+    let r = parseInt(hexColor.substring(0, 2), 16);
+    let g = parseInt(hexColor.substring(2, 4), 16);
+    let b = parseInt(hexColor.substring(4, 6), 16);
+
+    let brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+    return brightness > 155 ? "#111827" : "#ffffff";
+}
+
+
+
+
+function generateGraphic() {
+    const graphicWindow = window.open("", "_blank");
+
+    if (!graphicWindow) {
+        alert("Please allow pop-ups to view your graphic.");
+        return;
+    }
+
+    function createChevronSVG(direction, index) {
+        const isUp = direction === "up";
+        const rotation = isUp ? "" : "rotate(180 18 18)";
+        const id = "gradient" + index + direction;
+
+        const colors = isUp
+            ? ["#e4ffe9", "#71ef98", "#1bc455", "#087c31", "#03451d"]
+            : ["#ffe3e3", "#ff9090", "#f43139", "#a60b1c", "#56000b"];
+
+        return `
+            <svg class="double-chevron" viewBox="0 0 36 36" aria-hidden="true">
+                <defs>
+                    <linearGradient id="${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="${colors[0]}"/>
+                        <stop offset="22%" stop-color="${colors[1]}"/>
+                        <stop offset="48%" stop-color="${colors[2]}"/>
+                        <stop offset="75%" stop-color="${colors[3]}"/>
+                        <stop offset="100%" stop-color="${colors[4]}"/>
+                    </linearGradient>
+                </defs>
+
+                <g transform="${rotation}">
+                    <path
+                        d="M18 2 L34 18 L28.5 18 L18 7.5 L7.5 18 L2 18 Z"
+                        fill="url(#${id})"
+                        stroke="${isUp ? "#b7ffc8" : "#ffc1c1"}"
+                        stroke-width="1.2"
+                        stroke-linejoin="round"
+                    />
+                    <path
+                        d="M18 18 L34 34 L28.5 34 L18 23.5 L7.5 34 L2 34 Z"
+                        fill="url(#${id})"
+                        stroke="${isUp ? "#b7ffc8" : "#ffc1c1"}"
+                        stroke-width="1.2"
+                        stroke-linejoin="round"
+                    />
+                </g>
+            </svg>
+        `;
+    }
+
+    function renderMovement(change, index) {
+        if (change > 0) {
+            return `
+                <div class="movement-plate up">
+                    ${createChevronSVG("up", index)}
+                    <span class="movement-number">${change}</span>
+                </div>
+            `;
+        }
+
+        if (change < 0) {
+            return `
+                <div class="movement-plate down">
+                    ${createChevronSVG("down", index)}
+                    <span class="movement-number">${Math.abs(change)}</span>
+                </div>
+            `;
+        }
+
+        if (change === 0) {
+            return `
+                <div class="movement-plate same">
+                    <span class="movement-dash">—</span>
+                </div>
+            `;
+        }
+
+        return `<div class="movement-plate empty"></div>`;
+    }
+
+    // Rankings fill from left to right:
+    // 1-4, then 5-8, continuing through 29-32.
+    const columns = ["", "", "", ""];
+
+    teams.forEach(function(team, index) {
+        const rank = index + 1;
+        const change = getRankChange(team, rank);
+        const teamColor = teamColors[team] || "#333333";
+
+        const logoUrl =
+            "https://a.espncdn.com/i/teamlogos/nfl/500/" +
+            teamAbbreviations[team] + ".png";
+
+        const card = `
+            <div class="team-card" style="background-color: ${teamColor};">
+                <img
+                    class="team-logo"
+                    src="${logoUrl}"
+                    crossorigin="anonymous"
+                    alt="${team} logo"
+                >
+
+                <div class="card-overlay">
+                    <div class="rank-plate">
+                        <span class="rank-number">${rank}</span>
+                    </div>
+
+                    ${renderMovement(change, index)}
+                </div>
+            </div>
+        `;
+
+        const columnIndex = index % 4;
+        columns[columnIndex] += card;
+    });
+
+    graphicWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Week ${currentWeek} Power Rankings</title>
+
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&display=swap" rel="stylesheet">
+
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
+
+            <style>
+                * {
+                    box-sizing: border-box;
+                }
+
+                body {
+                    margin: 0;
+                    padding: 20px;
+                    background: #05070c;
+                    font-family: Arial, Helvetica, sans-serif;
+                    overflow-x: hidden;
+                }
+
+                /* DOWNLOAD BUTTON */
+
+                .download-controls {
+                    text-align: center;
+                    margin-bottom: 25px;
+                }
+
+                #downloadButton {
+                    background: #1f2937;
+                    color: white;
+                    border: 1px solid #475569;
+                    border-radius: 8px;
+                    padding: 14px 30px;
+                    font-size: 16px;
+                    font-weight: 800;
+                    cursor: pointer;
+                }
+
+                #downloadButton:hover {
+                    background: #334155;
+                }
+
+                #downloadButton:disabled {
+                    opacity: 0.6;
+                    cursor: wait;
+                }
+
+                /* RESPONSIVE PREVIEW WRAPPER */
+
+                .preview-wrapper {
+                    position: relative;
+                    width: 100%;
+                    margin: 0 auto;
+                }
+
+                /* ORIGINAL FULL-SIZE GRAPHIC */
+
+                .graphic-container {
+                    width: 1200px;
+                    margin: 0;
+                    background: #05070c;
+                    border-radius: 16px;
+                    overflow: hidden;
+                    box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+                    border: 1px solid #1f2937;
+
+                    transform-origin: top left;
+                }
+
+                /* HEADER */
+
+                .header {
+                    position: relative;
+                    overflow: hidden;
+                    background: linear-gradient(
+                        135deg,
+                        #05070c 0%,
+                        #10203c 50%,
+                        #05070c 100%
+                    );
+                    color: white;
+                    text-align: center;
+                    padding: 24px 20px 18px;
+                    border-bottom: 3px solid #334155;
+                }
+
+                .header-art {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                }
+
+                /* OPAQUE NFL SHIELD */
+
+                .nfl-watermark {
+                    position: absolute;
+                    width: 125px;
+                    height: 125px;
+                    left: 92%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
+                    object-fit: contain;
+                    opacity: 1;
+                }
+
+                .header-content {
+                    position: relative;
+                    z-index: 2;
+                }
+
+                /* ORIGINAL WHITE TEKO TITLE */
+
+                .header h1 {
+                    margin: 0;
+                    font-family: "Teko", Arial, sans-serif;
+                    font-size: 72px;
+                    font-weight: 700;
+                    letter-spacing: 3px;
+                    line-height: 0.95;
+                    color: #f8fafc;
+                    text-transform: uppercase;
+                    text-shadow: 0 3px 10px rgba(0,0,0,0.45);
+                }
+
+                .header-week {
+                    margin-top: 8px;
+                    font-family: "Teko", Arial, sans-serif;
+                    font-size: 40px;
+                    font-weight: 600;
+                    letter-spacing: 2px;
+                    line-height: 1;
+                    color: #cbd5e1;
+                    text-transform: uppercase;
+                    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+                }
+
+                /* RANKINGS GRID */
+
+                .content {
+                    padding: 20px;
+                    background: #05070c;
+                }
+
+                .columns {
+                    display: grid;
+                    grid-template-columns: repeat(4, minmax(0, 1fr));
+                    gap: 14px;
+                }
+
+                .column {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    min-width: 0;
+                }
+
+                /* TEAM CARDS */
+
+                .team-card {
+                    height: 160px;
+                    position: relative;
+                    overflow: hidden;
+                    border-radius: 9px;
+                    border: 2px solid rgba(255,255,255,0.10);
+                    box-shadow:
+                        0 4px 7px rgba(0,0,0,0.25),
+                        inset 0 1px 0 rgba(255,255,255,0.15);
+                }
+
+                .team-logo {
+                    position: absolute;
+                    width: 180px;
+                    height: 180px;
+                    left: 50%;
+                    top: 59%;
+                    transform: translate(-50%, -50%) scale(1.2);
+                    object-fit: contain;
+                    opacity: 1;
+                    z-index: 1;
+                    filter: drop-shadow(0 4px 7px rgba(0,0,0,0.20));
+                }
+
+                /* CARD OVERLAYS */
+
+                .card-overlay {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    z-index: 5;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    pointer-events: none;
+                }
+
+                /* RANK NUMBER */
+
+                .rank-plate {
+                    width: 59px;
+                    height: 50px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #0f172a;
+                    color: white;
+                    border-right: 3px solid #475569;
+                    border-bottom: 3px solid #475569;
+                    border-radius: 0 0 7px 0;
+                    box-shadow:
+                        3px 4px 7px rgba(0,0,0,0.42),
+                        inset 0 2px 0 rgba(255,255,255,0.12);
+                }
+
+                .rank-number {
+                    font-size: 33px;
+                    font-weight: 900;
+                    line-height: 1;
+                    color: #ffffff;
+                    text-shadow: 0 2px 3px rgba(0,0,0,0.65);
+                }
+
+                /* MOVEMENT INDICATORS */
+
+                .movement-plate {
+                    height: 50px;
+                    min-width: 82px;
+                    padding: 5px 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 5px;
+                    background: #0f172a;
+                    border-left: 3px solid #475569;
+                    border-bottom: 3px solid #475569;
+                    border-radius: 0 0 0 7px;
+                    box-shadow:
+                        -3px 4px 7px rgba(0,0,0,0.42),
+                        inset 0 2px 0 rgba(255,255,255,0.12);
+                }
+
+                /* 3D CHEVRONS */
+
+                .double-chevron {
+                    width: 33px;
+                    height: 33px;
+                    flex-shrink: 0;
+                    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.6));
+                }
+
+                .movement-number {
+                    font-size: 25px;
+                    font-weight: 900;
+                    line-height: 1;
+                    text-shadow: 0 2px 3px rgba(0,0,0,0.6);
+                }
+
+                .movement-plate.up .movement-number {
+                    color: #60ed8e;
+                }
+
+                .movement-plate.down .movement-number {
+                    color: #ff626e;
+                }
+
+                .movement-dash {
+                    font-size: 28px;
+                    font-weight: 900;
+                    color: #b9c4d4;
+                    line-height: 1;
+                }
+
+                .movement-plate.empty {
+                    visibility: hidden;
+                }
+            </style>
+        </head>
+
+        <body>
+
+            <div class="download-controls">
+                <button id="downloadButton" onclick="downloadGraphic()">
+                    Download PNG
+                </button>
+            </div>
+
+            <div class="preview-wrapper" id="previewWrapper">
+                <div class="graphic-container" id="graphic">
+
+                    <div class="header">
+
+                        <div class="header-art">
+                            <img
+                                class="nfl-watermark"
+                                src="https://a.espncdn.com/i/teamlogos/leagues/500/nfl.png"
+                                crossorigin="anonymous"
+                                alt=""
+                            >
+                        </div>
+
+                        <div class="header-content">
+                            <h1>NFL POWER RANKINGS</h1>
+                            <div class="header-week">Week ${currentWeek}</div>
+                        </div>
+
+                    </div>
+
+                    <div class="content">
+                        <div class="columns">
+                            <div class="column">${columns[0]}</div>
+                            <div class="column">${columns[1]}</div>
+                            <div class="column">${columns[2]}</div>
+                            <div class="column">${columns[3]}</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <script>
+                const graphic = document.getElementById("graphic");
+                const previewWrapper = document.getElementById("previewWrapper");
+
+                // Scale only the on-screen preview.
+                function resizePreview() {
+                    const availableWidth = document.body.clientWidth - 40;
+                    const originalWidth = 1200;
+
+                    const scale = Math.min(
+                        1,
+                        availableWidth / originalWidth
+                    );
+
+                    graphic.style.transform = "scale(" + scale + ")";
+
+                    previewWrapper.style.width =
+                        (originalWidth * scale) + "px";
+
+                    previewWrapper.style.height =
+                        (graphic.offsetHeight * scale) + "px";
+                }
+
+                window.addEventListener("resize", resizePreview);
+                resizePreview();
+
+                async function downloadGraphic() {
+                    const button = document.getElementById("downloadButton");
+
+                    button.disabled = true;
+                    button.textContent = "Generating PNG...";
+
+                    try {
+                        if (document.fonts && document.fonts.ready) {
+                            await document.fonts.ready;
+                        }
+
+                        if (typeof html2canvas === "undefined") {
+                            throw new Error(
+                                "The PNG export library did not load."
+                            );
+                        }
+
+                        await Promise.all(
+                            Array.from(graphic.querySelectorAll("img")).map(img => {
+                                if (img.complete) {
+                                    return Promise.resolve();
+                                }
+
+                                return new Promise(resolve => {
+                                    img.addEventListener(
+                                        "load",
+                                        resolve,
+                                        { once: true }
+                                    );
+                                    img.addEventListener(
+                                        "error",
+                                        resolve,
+                                        { once: true }
+                                    );
+                                });
+                            })
+                        );
+
+                        // Temporarily remove preview scaling for export.
+                        const previousTransform = graphic.style.transform;
+                        graphic.style.transform = "none";
+
+                        try {
+                            const canvas = await html2canvas(graphic, {
+                                scale: 2,
+                                backgroundColor: "#05070c",
+                                useCORS: true,
+                                allowTaint: false,
+                                logging: false,
+                                width: graphic.offsetWidth,
+                                height: graphic.offsetHeight,
+                                windowWidth: 1260
+                            });
+
+                            const link = document.createElement("a");
+                            link.download =
+                                "NFL-Power-Rankings-Week-${currentWeek}.png";
+                            link.href = canvas.toDataURL("image/png");
+
+                            document.body.appendChild(link);
+                            link.click();
+                            link.remove();
+
+                        } finally {
+                            // Restore the scaled preview.
+                            graphic.style.transform = previousTransform;
+                        }
+
+                    } catch (error) {
+                        console.error(error);
+                        alert(
+                            "Could not download the graphic. " +
+                            "Check Safari's developer console."
+                        );
+                    } finally {
+                        button.disabled = false;
+                        button.textContent = "Download PNG";
+                    }
+                }
+            <\/script>
+
+        </body>
+        </html>
+    `);
+
+    graphicWindow.document.close();
+}
+
+
+
+
+
+
+
+
+document.getElementById("seasonSelect").value = String(currentSeason);
+
+
+displayRankings();
+
+lucide.createIcons();
+
+</script>
+
+
+</body>
+</html>
