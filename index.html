@@ -1468,9 +1468,15 @@ function generateGraphic() {
 
         <body>
 
-            <div class="download-controls">
+            <div class="download-controls">               
                 <button id="downloadButton" onclick="downloadGraphic()">
-                    Download PNG
+                    Prepare PNG
+                </button>
+
+                <button id="shareButton"
+                        onclick="shareGraphic()"
+                        style="display: none;">
+                    Save to Photos
                 </button>
             </div>
 
@@ -1533,6 +1539,29 @@ function generateGraphic() {
                 window.addEventListener("resize", resizePreview);
                 resizePreview();
 
+
+
+let preparedGraphicFile = null;
+
+function shareGraphic() {
+    if (!preparedGraphicFile) return;
+
+    if (navigator.canShare?.({ files: [preparedGraphicFile] })) {
+        navigator.share({ files: [preparedGraphicFile] })
+            .catch(error => {
+                if (error.name !== "AbortError") {
+                    alert("Could not open the Share Sheet.");
+                }
+            });
+    } else {
+        alert("Sharing isn't available in this browser.");
+    }
+}
+
+
+
+
+
                 async function downloadGraphic() {
                     const button = document.getElementById("downloadButton");
 
@@ -1590,7 +1619,29 @@ function generateGraphic() {
                             const link = document.createElement("a");
                             link.download =
                                 "NFL-Power-Rankings-Week-${currentWeek}.png";
+                            
                             link.href = canvas.toDataURL("image/png");
+
+                            if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                                const blob = await new Promise(resolve =>
+                                    canvas.toBlob(resolve, "image/png")
+                                );
+
+                                if (!blob) {
+                                    throw new Error("Could not prepare the PNG.");
+                                }
+
+                                preparedGraphicFile = new File(
+                                    [blob],
+                                    "NFL-Power-Rankings-Week-${currentWeek}.png",
+                                    { type: "image/png" }
+                                );
+
+                                document.getElementById("shareButton").style.display = "inline-block";
+                                link.remove();
+                                return;
+}
+
 
                             document.body.appendChild(link);
                             link.click();
@@ -1609,7 +1660,7 @@ function generateGraphic() {
                         );
                     } finally {
                         button.disabled = false;
-                        button.textContent = "Download PNG";
+                        button.textContent = "Prepare PNG";
                     }
                 }
             <\/script>
