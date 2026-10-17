@@ -1042,9 +1042,13 @@ document.getElementById("weekTitle").textContent =
     
 updateAllWeeks();
 
+
 teams = JSON.parse(
-    localStorage.getItem("rankings_week_" + currentWeek)
+    localStorage.getItem(
+        "rankings_" + currentSeason + "_week_" + currentWeek
+    )
 ) || [...defaultTeams];
+
 
 function getContrastTextColor(hexColor) {
     hexColor = hexColor.replace("#", "");
