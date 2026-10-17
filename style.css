@@ -839,3 +839,146 @@ body > button:active {
     }
 }
 
+
+
+/* =====================================
+   MOBILE IMPROVEMENTS - IPHONE
+===================================== */
+
+@media (max-width: 600px) {
+
+    /* Keep everything within the phone screen */
+    body {
+        padding: 10px;
+        overflow-x: hidden;
+    }
+
+    /* Header */
+    .site-header {
+        gap: 8px;
+        padding: 0 5px;
+        margin-top: 12px;
+    }
+
+    .site-header .conference-logo {
+        width: 42px;
+        height: 42px;
+        position: static;
+    }
+
+    .site-header .conference-logo:first-child,
+    .site-header .conference-logo:last-child {
+        left: auto;
+        right: auto;
+    }
+
+    .site-header .header-text h1 {
+        font-size: clamp(25px, 7vw, 32px);
+        white-space: normal;
+        line-height: 1;
+        letter-spacing: 1px;
+    }
+
+    .site-header .header-text p {
+        font-size: 11px;
+        line-height: 1.3;
+        margin-top: 5px;
+    }
+
+    /* Week title - one line */
+    .season-week-header {
+        margin: 12px auto;
+        padding: 0;
+    }
+
+    #weekTitle,
+    .season-week-header #weekTitle {
+        font-size: clamp(25px, 7vw, 34px);
+        letter-spacing: 1px;
+        white-space: nowrap;
+        margin: 10px auto;
+    }
+
+    /* Toolbar - wrap buttons instead of cutting them off */
+    .controls-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow: visible;
+        gap: 4px;
+        padding: 8px;
+        margin: 12px auto;
+    }
+
+    .controls-container button {
+        font-size: 11px;
+        padding: 9px 7px;
+        white-space: nowrap;
+    }
+
+    .controls-container button svg {
+        width: 15px;
+        height: 15px;
+    }
+
+    .toolbar-divider {
+        display: none;
+    }
+
+    #seasonSelect {
+        font-size: 13px;
+        padding: 7px 5px;
+        flex-shrink: 0;
+    }
+
+    /* Rankings list */
+    #rankings {
+        padding: 0 2px;
+        margin-top: 12px;
+    }
+
+    #rankings .ranking-card {
+        min-height: 55px;
+        padding: 6px 7px;
+        gap: 6px !important;
+        margin: 5px 0;
+        box-sizing: border-box;
+    }
+
+    /* Ranking numbers */
+    #rankings .ranking-card strong {
+        font-size: 25px;
+        min-width: 28px;
+    }
+
+    /* Team logos */
+    #rankings .ranking-card img {
+        width: 29px;
+        height: 29px;
+        flex-shrink: 0;
+    }
+
+    /* Team names */
+    #rankings .ranking-card > span {
+        font-size: 12px;
+        white-space: nowrap;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Move buttons */
+    #rankings .ranking-card button {
+        width: 30px;
+        height: 34px;
+        min-width: 30px;
+        padding: 0;
+        flex-shrink: 0;
+    }
+}
+
+
