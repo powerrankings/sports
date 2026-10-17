@@ -67,6 +67,8 @@
         <i data-lucide="chevron-left"></i>
     </button>
 
+    <span id="weekNavLabel">Week 1</span>
+
     <button onclick="nextWeek()" title="Next Week">
         <i data-lucide="chevron-right"></i>
     </button>
@@ -288,6 +290,11 @@ teams = JSON.parse(
 
 
 function displayRankings() {
+
+
+document.getElementById("weekNavLabel").textContent =
+    "Week " + currentWeek;
+
     let rankingsDiv = document.getElementById("rankings");
     rankingsDiv.innerHTML = "";
 
@@ -1500,7 +1507,7 @@ function generateGraphic() {
             <div class="download-controls">               
                 
                 <button id="downloadButton" onclick="downloadGraphic()">
-                    Prepare PNG
+                    Download PNG
                 </button>
 
                 <button id="shareButton"
@@ -1578,7 +1585,7 @@ if (isIOS) {
     document.getElementById("downloadButton").style.display = "none";
     document.getElementById("shareButton").style.display = "inline-block";
     document.getElementById("shareButton").textContent = "Preparing Image...";
-    
+
     // Prepare the image when the graphic opens.
     downloadGraphic();
 }
@@ -1704,7 +1711,7 @@ function shareGraphic() {
                         );
                     } finally {
                         button.disabled = false;
-                        button.textContent = "Prepare PNG";
+                        button.textContent = "Download PNG";
                     }
                 }
             <\/script>

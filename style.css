@@ -1008,6 +1008,22 @@ body > button:active {
 
 
 
+#weekNavLabel {
+    color: #f8fafc;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    padding: 0 8px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    #weekNavLabel {
+        font-size: 12px;
+        padding: 0 3px;
+    }
+}
+
 
 
 
