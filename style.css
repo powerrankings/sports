@@ -1001,7 +1001,7 @@ body > button:active {
 
 @media (max-width: 600px) {
     .site-header .conference-logo {
-        transform: translateY(15px);
+        transform: translateY(50px);
     }
 }
 
