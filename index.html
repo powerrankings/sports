@@ -1234,6 +1234,35 @@ function generateGraphic() {
                     cursor: wait;
                 }
 
+
+/* iPhone Save Image button */
+#shareButton {
+    display: none;
+    background: linear-gradient(135deg, #243b60, #14243e);
+    color: #ffffff;
+    border: 1px solid #6484b4;
+    border-radius: 10px;
+    padding: 13px 28px;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+#shareButton:not(:disabled):active {
+    background: #345681;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+#shareButton:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+
                 /* RESPONSIVE PREVIEW WRAPPER */
 
                 .preview-wrapper {
@@ -1548,7 +1577,8 @@ const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 if (isIOS) {
     document.getElementById("downloadButton").style.display = "none";
     document.getElementById("shareButton").style.display = "inline-block";
-
+    document.getElementById("shareButton").textContent = "Preparing Image...";
+    
     // Prepare the image when the graphic opens.
     downloadGraphic();
 }
@@ -1650,7 +1680,7 @@ function shareGraphic() {
                                     { type: "image/png" }
                                 );
                                 document.getElementById("shareButton").disabled = false;
-
+                                document.getElementById("shareButton").textContent = "Save Image";
                                 document.getElementById("shareButton").style.display = "inline-block";
                                 link.remove();
                                 return;
