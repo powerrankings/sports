@@ -782,3 +782,45 @@ body > button:active {
 .remove-team-button:hover {
     color: #ff6464;
 }
+
+
+
+/* ==================================
+   MOBILE LAYOUT
+================================== */
+
+@media (max-width: 600px) {
+
+    .site-header {
+        gap: 8px;
+        padding: 0 12px;
+        margin-top: 20px;
+    }
+
+    .site-header .conference-logo {
+        width: 45px;
+        height: 45px;
+        position: static;
+        top: auto;
+    }
+
+    .site-header .conference-logo:first-child {
+        left: auto;
+    }
+
+    .site-header .conference-logo:last-child {
+        right: auto;
+    }
+
+    .site-header .header-text h1 {
+        font-size: 32px;
+        white-space: normal;
+        line-height: 1;
+    }
+
+    .site-header .header-text p {
+        font-size: 11px;
+        line-height: 1.3;
+        margin-top: 5px;
+    }
+}
