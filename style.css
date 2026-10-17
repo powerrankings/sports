@@ -1006,3 +1006,37 @@ body > button:active {
 }
 
 
+
+@media (max-width: 600px) {
+
+    /* Reduce space above the title */
+    .site-header {
+        margin-top: 5px;
+    }
+
+    /* Reduce space between title and subtitle */
+    .site-header .header-text p {
+        margin-top: 2px;
+    }
+
+    /* Bring week heading closer to subtitle */
+    .season-week-header {
+        margin-top: 0;
+        margin-bottom: 4px;
+    }
+
+    #weekTitle,
+    .season-week-header #weekTitle {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    /* Bring toolbar closer to week heading */
+    .controls-container {
+        margin-top: 4px;
+        margin-bottom: 10px;
+    }
+}
+
+
+
