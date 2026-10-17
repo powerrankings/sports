@@ -1469,6 +1469,7 @@ function generateGraphic() {
         <body>
 
             <div class="download-controls">               
+                
                 <button id="downloadButton" onclick="downloadGraphic()">
                     Prepare PNG
                 </button>
@@ -1476,8 +1477,10 @@ function generateGraphic() {
                 <button id="shareButton"
                         onclick="shareGraphic()"
                         style="display: none;">
-                    Save to Photos
+                        disabled>
+                    Save Image
                 </button>
+
             </div>
 
             <div class="preview-wrapper" id="previewWrapper">
@@ -1539,6 +1542,16 @@ function generateGraphic() {
                 window.addEventListener("resize", resizePreview);
                 resizePreview();
 
+
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+
+if (isIOS) {
+    document.getElementById("downloadButton").style.display = "none";
+    document.getElementById("shareButton").style.display = "inline-block";
+
+    // Prepare the image when the graphic opens.
+    downloadGraphic();
+}
 
 
 let preparedGraphicFile = null;
@@ -1636,6 +1649,7 @@ function shareGraphic() {
                                     "NFL-Power-Rankings-Week-${currentWeek}.png",
                                     { type: "image/png" }
                                 );
+                                document.getElementById("shareButton").disabled = false;
 
                                 document.getElementById("shareButton").style.display = "inline-block";
                                 link.remove();
