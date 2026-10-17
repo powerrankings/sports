@@ -824,3 +824,18 @@ body > button:active {
         margin-top: 5px;
     }
 }
+
+
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+        overflow-x: hidden;
+    }
+
+    .controls-container {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+}
+
