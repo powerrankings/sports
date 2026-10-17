@@ -982,3 +982,27 @@ body > button:active {
 }
 
 
+@media (max-width: 600px) {
+
+    #rankings .ranking-card > span {
+        flex-shrink: 1;
+        min-width: 0;
+    }
+
+    #rankings .ranking-card > span:last-of-type {
+        flex-shrink: 0;
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: clip;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+    .site-header .conference-logo {
+        transform: translateY(15px);
+    }
+}
+
+
