@@ -440,10 +440,9 @@ let teamsLoaded = false;
 
 async function loadCollegeTeams() {
     try {
-        const response = await fetch(
-            "https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams?groups=80&limit=500"
-        );
-
+        const response = await fetch(           
+            "https://site.web.api.espn.com/apis/site/v2/sports/football/college-football/teams?groups=80&groupType=conference&enable=groups"
+    );
         if (!response.ok) {
             throw new Error("Team directory unavailable");
         }
