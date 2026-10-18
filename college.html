@@ -243,6 +243,11 @@ button, select {
     color: #94a3b8;
 }
 
+.movement.new {
+    color: #fbbf24;
+    letter-spacing: 0.4px;
+}
+
 .card-actions {
     display: flex;
     align-items: center;
@@ -545,7 +550,7 @@ function getMovement(teamId, currentRank) {
 
     const oldIndex = previous.indexOf(teamId);
 
-    if (oldIndex < 0) return "";
+    if (oldIndex < 0) return '<span class="movement new">NEW</span>';
 
     const difference = oldIndex + 1 - currentRank;
 
@@ -991,7 +996,7 @@ function generateGraphic() {
         if (!Array.isArray(previousRankings)) return null;
 
         const oldIndex = previousRankings.indexOf(teamId);
-        if (oldIndex < 0) return null;
+        if (oldIndex < 0) return "new";
 
         return (oldIndex + 1) - currentRank;
     }
@@ -1038,6 +1043,9 @@ function generateGraphic() {
     }
 
     function renderMovement(change, index) {
+        if (change === "new") {
+            return `<div class="movement-plate new"><span class="movement-new">NEW</span></div>`;
+        }
         if (change > 0) {
             return `
                 <div class="movement-plate up">
@@ -1357,6 +1365,13 @@ function generateGraphic() {
 
                 .movement-plate.down .movement-number {
                     color: #ff626e;
+                }
+
+                .movement-new {
+                    font-size: 20px;
+                    font-weight: 900;
+                    color: #fbbf24;
+                    letter-spacing: 1px;
                 }
 
                 .movement-dash {
