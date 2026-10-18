@@ -186,6 +186,9 @@ button, select {
     border-radius: 8px;
     max-height: 240px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
     z-index: 100;
     box-shadow: 0 10px 24px #0008;
 }
@@ -201,6 +204,7 @@ button, select {
     padding: 10px;
     font-size: 13px;
     cursor: pointer;
+    touch-action: pan-y;
 }
 
 .team-option:hover {
@@ -740,9 +744,9 @@ function showTeamResults(index, input, menu) {
         option.appendChild(logo);
         option.appendChild(name);
 
-        // pointerdown works for mouse and touch.
-        option.addEventListener("pointerdown", event => {
-            event.preventDefault();
+        // Select on click/tap release instead of pointerdown.
+        // Pointerdown fires at the start of a swipe and prevented scrolling on iOS.
+        option.addEventListener("click", () => {
             selectTeam(index, team.id);
         });
 
