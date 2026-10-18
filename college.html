@@ -1,10 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>College Football Power Rankings</title>
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&display=swap" rel="stylesheet">
 
@@ -59,10 +59,11 @@ h2 {
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 8px;
+    gap: 2px;
     max-width: 1050px;
+    width: fit-content;
     margin: 12px auto 18px;
-    padding: 10px;
+    padding: 7px;
     border-radius: 12px;
     background: #17243b;
     border: 1px solid #405574;
@@ -74,11 +75,11 @@ button, select {
 
 .toolbar button,
 .toolbar select {
-    background: #243955;
+    background: transparent;
     color: white;
-    border: 1px solid #466080;
+    border: 1px solid transparent;
     border-radius: 7px;
-    padding: 10px 13px;
+    padding: 9px 10px;
     font-size: 13px;
     font-weight: bold;
     cursor: pointer;
@@ -338,47 +339,106 @@ button, select {
         display: none;
     }
 }
+
+/* Same compact, icon-based toolbar style as the NFL page */
+.toolbar button {display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;}
+.toolbar button svg {width: 18px; height: 18px; flex-shrink: 0;}
+.toolbar select {background:#243955; border:1px solid #466080; border-radius:7px;}
+.toolbar-divider {height:25px; width:1px; flex-shrink:0; background:#405574; margin:0 5px;}
+@media(max-width:600px) {
+    .toolbar {width:100%; max-width:100%; gap:4px; padding:8px;}
+    .toolbar button {padding:9px 7px; font-size:11px;}
+    .toolbar button svg {width:15px; height:15px;}
+    .toolbar-divider {display:none;}
+    #weekLabel {font-size:12px;}
+}
+
+/* College header: conference logos surround the title, as on the NFL page. */
+.college-masthead {
+    display: grid;
+    grid-template-columns: minmax(145px, 1fr) minmax(0, 3fr) minmax(145px, 1fr);
+    gap: 16px;
+    align-items: center;
+    max-width: 1460px;
+    margin: 12px auto 14px;
+}
+.masthead-center { min-width: 0; text-align: center; }
+.college-masthead h1 { font-size: clamp(32px, 4.2vw, 68px); }
+.conference-cluster {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+    min-width: 0;
+}
+.conference-cluster img {
+    display: block;
+    width: min(47%, 88px);
+    height: 62px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,.24));
+}
+.ncaa-logo { display: block; width: 43px; height: 43px; object-fit: contain; margin: 12px auto 0; }
+@media (max-width: 800px) {
+    .college-masthead { grid-template-columns: 1fr 1fr; column-gap: 16px; row-gap: 12px; margin-top: 10px; }
+    .masthead-center { grid-column: 1 / -1; grid-row: 1; }
+    .college-masthead h1 { font-size: clamp(30px, 6.6vw, 48px); }
+    .cluster-left { grid-column: 1; grid-row: 2; justify-content: flex-end; }
+    .cluster-right { grid-column: 2; grid-row: 2; justify-content: flex-start; }
+    .conference-cluster img { width: 49px; height: 36px; }
+    .ncaa-logo { width: 36px; height: 36px; margin-top: 7px; }
+}
+@media (max-width: 380px) {
+    .conference-cluster { gap: 7px; }
+    .conference-cluster img { width: 38px; height: 31px; }
+}
 </style>
 </head>
 
 <body>
 
-<header>
-    <h1>COLLEGE FOOTBALL POWER RANKINGS</h1>
-    <div class="subtitle">Weekly College Football Power Rankings Builder</div>
+<header class="college-masthead">
+    <div class="conference-cluster cluster-left" aria-label="ACC and Big Ten conferences">
+        <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Atlantic_Coast_Conference_logo.svg" alt="ACC" loading="eager">
+        <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Big_Ten_Conference_logo.svg" alt="Big Ten" loading="eager">
+    </div>
+    <div class="masthead-center">
+        <h1>COLLEGE FOOTBALL POWER RANKINGS</h1>
+        <div class="subtitle">Weekly College Football Power Rankings Builder</div>
+        <img class="ncaa-logo" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/NCAA_logo.svg" alt="NCAA" loading="eager">
+    </div>
+    <div class="conference-cluster cluster-right" aria-label="Big 12 and SEC conferences">
+        <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Big_12_Conference.svg" alt="Big 12" loading="eager">
+        <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Southeastern_Conference_logo_(2024).svg" alt="SEC" loading="eager">
+    </div>
 </header>
 
 <h2 id="weekTitle">Week 1 Rankings</h2>
 
 <div class="toolbar">
-
-    <select id="seasonSelect" onchange="changeSeason()">
+    <select id="seasonSelect" onchange="changeSeason()" title="Season">
         <option value="2026">2026</option>
         <option value="2027">2027</option>
         <option value="2028">2028</option>
         <option value="2029">2029</option>
         <option value="2030">2030</option>
     </select>
-
-    <button onclick="previousWeek()" title="Previous Week">❮</button>
-
+    <span class="toolbar-divider"></span>
+    <button onclick="previousWeek()" title="Previous Week"><i data-lucide="chevron-left"></i></button>
     <span id="weekLabel">Week 1</span>
-
-    <button onclick="nextWeek()" title="Next Week">❯</button>
-
-    <button id="top10Button" onclick="setRankingSize(10)">
-        Top 10
-    </button>
-
-    <button id="top25Button" onclick="setRankingSize(25)">
-        Top 25
-    </button>
-
-    <button onclick="window.location.href='index.html'">
-        NFL Rankings
-    </button>
-
+    <button onclick="nextWeek()" title="Next Week"><i data-lucide="chevron-right"></i></button>
+    <span class="toolbar-divider"></span>
+    <button onclick="copyPreviousWeek()" title="Copy Previous Week's Rankings"><i data-lucide="copy"></i> Copy Last Week</button>
+    <button onclick="sortAlphabetically()" title="Sort Filled Teams Alphabetically"><i data-lucide="arrow-down-a-z"></i> A–Z</button>
+    <button id="top10Button" onclick="setRankingSize(10)">Top 10</button>
+    <button id="top25Button" onclick="setRankingSize(25)">Top 25</button>
+    <button onclick="generateGraphic()" title="Generate Graphic"><i data-lucide="image"></i> Graphic</button>
+    <button onclick="window.location.href='index.html'" title="NFL Rankings"><i data-lucide="shield"></i> NFL Rankings</button>
+    <span class="toolbar-divider"></span>
+    <button onclick="downloadBackup()" title="Download College Rankings Backup"><i data-lucide="download"></i> Backup</button>
+    <button onclick="document.getElementById('collegeBackupInput').click()" title="Restore College Rankings Backup"><i data-lucide="upload"></i> Restore</button>
 </div>
+<input id="collegeBackupInput" type="file" accept=".json,application/json" style="display:none" onchange="restoreBackup(event)">
 
 <div id="rankings"></div>
 
@@ -434,61 +494,18 @@ function loadRankings() {
 
 let rankings = loadRankings();
 
-// College team data is loaded from ESPN.
+// College team names and logo URLs are loaded from our own JSON file.
 let collegeTeams = [];
 let teamsLoaded = false;
 
-async function loadCollegeTeams() {
-    try {
-        const response = await fetch(           
-            "https://site.web.api.espn.com/apis/site/v2/sports/football/college-football/teams?groups=80&groupType=conference&enable=groups"
-    );
-        if (!response.ok) {
-            throw new Error("Team directory unavailable");
-        }
+// Built-in FBS directory: works without cross-origin API calls or extra files.
+const embeddedCollegeTeams = [{"id":"2005","name":"Air Force Falcons","shortName":"Air","location":"Air Force","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2005.png","color":"#506d95"},{"id":"2006","name":"Akron Zips","shortName":"Akron","location":"Akron","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2006.png","color":"#506d95"},{"id":"333","name":"Alabama Crimson Tide","shortName":"Alabama","location":"Alabama Crimson","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/333.png","color":"#506d95"},{"id":"2026","name":"Appalachian State Mountaineers","shortName":"Appalachian","location":"Appalachian State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2026.png","color":"#506d95"},{"id":"12","name":"Arizona Wildcats","shortName":"Arizona","location":"Arizona","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/12.png","color":"#506d95"},{"id":"9","name":"Arizona State Sun Devils","shortName":"Arizona","location":"Arizona State Sun","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/9.png","color":"#506d95"},{"id":"8","name":"Arkansas Razorbacks","shortName":"Arkansas","location":"Arkansas","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/8.png","color":"#506d95"},{"id":"2032","name":"Arkansas State Red Wolves","shortName":"Arkansas","location":"Arkansas State Red","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2032.png","color":"#506d95"},{"id":"349","name":"Army Black Knights","shortName":"Army","location":"Army Black","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/349.png","color":"#506d95"},{"id":"2","name":"Auburn Tigers","shortName":"Auburn","location":"Auburn","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2.png","color":"#506d95"},{"id":"2050","name":"Ball State Cardinals","shortName":"Ball","location":"Ball State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2050.png","color":"#506d95"},{"id":"239","name":"Baylor Bears","shortName":"Baylor","location":"Baylor","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/239.png","color":"#506d95"},{"id":"68","name":"Boise State Broncos","shortName":"Boise","location":"Boise State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/68.png","color":"#506d95"},{"id":"103","name":"Boston College Eagles","shortName":"Boston","location":"Boston College","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/103.png","color":"#506d95"},{"id":"189","name":"Bowling Green Falcons","shortName":"Bowling","location":"Bowling Green","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/189.png","color":"#506d95"},{"id":"2084","name":"Buffalo Bulls","shortName":"Buffalo","location":"Buffalo","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2084.png","color":"#506d95"},{"id":"252","name":"BYU Cougars","shortName":"BYU","location":"BYU","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/252.png","color":"#506d95"},{"id":"25","name":"California Golden Bears","shortName":"California","location":"California Golden","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/25.png","color":"#506d95"},{"id":"2117","name":"Central Michigan Chippewas","shortName":"Central","location":"Central Michigan","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2117.png","color":"#506d95"},{"id":"2429","name":"Charlotte 49ers","shortName":"Charlotte","location":"Charlotte","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2429.png","color":"#506d95"},{"id":"2132","name":"Cincinnati Bearcats","shortName":"Cincinnati","location":"Cincinnati","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2132.png","color":"#506d95"},{"id":"228","name":"Clemson Tigers","shortName":"Clemson","location":"Clemson","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/228.png","color":"#506d95"},{"id":"324","name":"Coastal Carolina Chanticleers","shortName":"Coastal","location":"Coastal Carolina","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/324.png","color":"#506d95"},{"id":"38","name":"Colorado Buffaloes","shortName":"Colorado","location":"Colorado","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/38.png","color":"#506d95"},{"id":"36","name":"Colorado State Rams","shortName":"Colorado","location":"Colorado State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/36.png","color":"#506d95"},{"id":"48","name":"Delaware Fightin' Blue Hens","shortName":"Delaware","location":"Delaware Fightin' Blue","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/48.png","color":"#506d95"},{"id":"150","name":"Duke Blue Devils","shortName":"Duke","location":"Duke Blue","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/150.png","color":"#506d95"},{"id":"151","name":"East Carolina Pirates","shortName":"East","location":"East Carolina","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/151.png","color":"#506d95"},{"id":"2199","name":"Eastern Michigan Eagles","shortName":"Eastern","location":"Eastern Michigan","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2199.png","color":"#506d95"},{"id":"2229","name":"FIU Panthers","shortName":"FIU","location":"FIU","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2229.png","color":"#506d95"},{"id":"57","name":"Florida Gators","shortName":"Florida","location":"Florida","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/57.png","color":"#506d95"},{"id":"2226","name":"Florida Atlantic Owls","shortName":"Florida","location":"Florida Atlantic","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2226.png","color":"#506d95"},{"id":"52","name":"Florida State Seminoles","shortName":"Florida","location":"Florida State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/52.png","color":"#506d95"},{"id":"278","name":"Fresno State Bulldogs","shortName":"Fresno","location":"Fresno State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/278.png","color":"#506d95"},{"id":"61","name":"Georgia Bulldogs","shortName":"Georgia","location":"Georgia","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/61.png","color":"#506d95"},{"id":"290","name":"Georgia Southern Eagles","shortName":"Georgia","location":"Georgia Southern","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/290.png","color":"#506d95"},{"id":"2247","name":"Georgia State Panthers","shortName":"Georgia","location":"Georgia State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2247.png","color":"#506d95"},{"id":"59","name":"Georgia Tech Yellow Jackets","shortName":"Georgia","location":"Georgia Tech Yellow","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/59.png","color":"#506d95"},{"id":"62","name":"Hawaii Rainbow Warriors","shortName":"Hawaii","location":"Hawaii Rainbow","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/62.png","color":"#506d95"},{"id":"248","name":"Houston Cougars","shortName":"Houston","location":"Houston","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/248.png","color":"#506d95"},{"id":"356","name":"Illinois Fighting Illini","shortName":"Illinois","location":"Illinois Fighting","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/356.png","color":"#506d95"},{"id":"84","name":"Indiana Hoosiers","shortName":"Indiana","location":"Indiana","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/84.png","color":"#506d95"},{"id":"2294","name":"Iowa Hawkeyes","shortName":"Iowa","location":"Iowa","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2294.png","color":"#506d95"},{"id":"66","name":"Iowa State Cyclones","shortName":"Iowa","location":"Iowa State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/66.png","color":"#506d95"},{"id":"55","name":"Jacksonville State Gamecocks","shortName":"Jacksonville","location":"Jacksonville State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/55.png","color":"#506d95"},{"id":"256","name":"James Madison Dukes","shortName":"James","location":"James Madison","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/256.png","color":"#506d95"},{"id":"2305","name":"Kansas Jayhawks","shortName":"Kansas","location":"Kansas","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2305.png","color":"#506d95"},{"id":"2306","name":"Kansas State Wildcats","shortName":"Kansas","location":"Kansas State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2306.png","color":"#506d95"},{"id":"338","name":"Kennesaw State Owls","shortName":"Kennesaw","location":"Kennesaw State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/338.png","color":"#506d95"},{"id":"2309","name":"Kent State Golden Flashes","shortName":"Kent","location":"Kent State Golden","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2309.png","color":"#506d95"},{"id":"96","name":"Kentucky Wildcats","shortName":"Kentucky","location":"Kentucky","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/96.png","color":"#506d95"},{"id":"2335","name":"Liberty Flames","shortName":"Liberty","location":"Liberty","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2335.png","color":"#506d95"},{"id":"309","name":"Louisiana Ragin' Cajuns","shortName":"Louisiana","location":"Louisiana Ragin'","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/309.png","color":"#506d95"},{"id":"2348","name":"Louisiana Tech Bulldogs","shortName":"Louisiana","location":"Louisiana Tech","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2348.png","color":"#506d95"},{"id":"97","name":"Louisville Cardinals","shortName":"Louisville","location":"Louisville","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/97.png","color":"#506d95"},{"id":"99","name":"LSU Tigers","shortName":"LSU","location":"LSU","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/99.png","color":"#506d95"},{"id":"276","name":"Marshall Thundering Herd","shortName":"Marshall","location":"Marshall Thundering","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/276.png","color":"#506d95"},{"id":"120","name":"Maryland Terrapins","shortName":"Maryland","location":"Maryland","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/120.png","color":"#506d95"},{"id":"235","name":"Memphis Tigers","shortName":"Memphis","location":"Memphis","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/235.png","color":"#506d95"},{"id":"2390","name":"Miami Hurricanes","shortName":"Miami","location":"Miami","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2390.png","color":"#506d95"},{"id":"193","name":"Miami (OH) RedHawks","shortName":"Miami","location":"Miami (OH)","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/193.png","color":"#506d95"},{"id":"130","name":"Michigan Wolverines","shortName":"Michigan","location":"Michigan","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/130.png","color":"#506d95"},{"id":"127","name":"Michigan State Spartans","shortName":"Michigan","location":"Michigan State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/127.png","color":"#506d95"},{"id":"2393","name":"Middle Tennessee Blue Raiders","shortName":"Middle","location":"Middle Tennessee Blue","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2393.png","color":"#506d95"},{"id":"135","name":"Minnesota Golden Gophers","shortName":"Minnesota","location":"Minnesota Golden","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/135.png","color":"#506d95"},{"id":"344","name":"Mississippi State Bulldogs","shortName":"Mississippi","location":"Mississippi State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/344.png","color":"#506d95"},{"id":"142","name":"Missouri Tigers","shortName":"Missouri","location":"Missouri","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/142.png","color":"#506d95"},{"id":"2623","name":"Missouri State Bears","shortName":"Missouri","location":"Missouri State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2623.png","color":"#506d95"},{"id":"2426","name":"Navy Midshipmen","shortName":"Navy","location":"Navy","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2426.png","color":"#506d95"},{"id":"152","name":"NC State Wolfpack","shortName":"NC","location":"NC State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/152.png","color":"#506d95"},{"id":"158","name":"Nebraska Cornhuskers","shortName":"Nebraska","location":"Nebraska","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/158.png","color":"#506d95"},{"id":"2440","name":"Nevada Wolf Pack","shortName":"Nevada","location":"Nevada Wolf","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2440.png","color":"#506d95"},{"id":"167","name":"New Mexico Lobos","shortName":"New","location":"New Mexico","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/167.png","color":"#506d95"},{"id":"166","name":"New Mexico State Aggies","shortName":"New Mexico State Aggies","location":"New Mexico State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/166.png","color":"#506d95"},{"id":"153","name":"North Carolina Tar Heels","shortName":"North","location":"North Carolina Tar","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/153.png","color":"#506d95"},{"id":"249","name":"North Texas Mean Green","shortName":"North","location":"North Texas Mean","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/249.png","color":"#506d95"},{"id":"2459","name":"Northern Illinois Huskies","shortName":"Northern","location":"Northern Illinois","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2459.png","color":"#506d95"},{"id":"77","name":"Northwestern Wildcats","shortName":"Northwestern","location":"Northwestern","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/77.png","color":"#506d95"},{"id":"87","name":"Notre Dame Fighting Irish","shortName":"Notre Dame","location":"Notre Dame Fighting","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/87.png","color":"#506d95"},{"id":"195","name":"Ohio Bobcats","shortName":"Ohio","location":"Ohio","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/195.png","color":"#506d95"},{"id":"194","name":"Ohio State Buckeyes","shortName":"Ohio","location":"Ohio State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/194.png","color":"#506d95"},{"id":"201","name":"Oklahoma Sooners","shortName":"Oklahoma","location":"Oklahoma","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/201.png","color":"#506d95"},{"id":"197","name":"Oklahoma State Cowboys","shortName":"Oklahoma","location":"Oklahoma State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/197.png","color":"#506d95"},{"id":"295","name":"Old Dominion Monarchs","shortName":"Old","location":"Old Dominion","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/295.png","color":"#506d95"},{"id":"145","name":"Ole Miss Rebels","shortName":"Ole","location":"Ole Miss","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/145.png","color":"#506d95"},{"id":"2483","name":"Oregon Ducks","shortName":"Oregon","location":"Oregon","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2483.png","color":"#506d95"},{"id":"204","name":"Oregon State Beavers","shortName":"Oregon","location":"Oregon State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/204.png","color":"#506d95"},{"id":"213","name":"Penn State Nittany Lions","shortName":"Penn","location":"Penn State Nittany","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/213.png","color":"#506d95"},{"id":"221","name":"Pittsburgh Panthers","shortName":"Pittsburgh","location":"Pittsburgh","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/221.png","color":"#506d95"},{"id":"2509","name":"Purdue Boilermakers","shortName":"Purdue","location":"Purdue","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2509.png","color":"#506d95"},{"id":"242","name":"Rice Owls","shortName":"Rice","location":"Rice","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/242.png","color":"#506d95"},{"id":"164","name":"Rutgers Scarlet Knights","shortName":"Rutgers","location":"Rutgers Scarlet","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/164.png","color":"#506d95"},{"id":"2534","name":"Sam Houston Bearkats","shortName":"Sam","location":"Sam Houston","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2534.png","color":"#506d95"},{"id":"21","name":"San Diego State Aztecs","shortName":"San","location":"San Diego State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/21.png","color":"#506d95"},{"id":"23","name":"San Jose State Spartans","shortName":"San","location":"San Jose State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/23.png","color":"#506d95"},{"id":"6","name":"South Alabama Jaguars","shortName":"South","location":"South Alabama","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/6.png","color":"#506d95"},{"id":"2579","name":"South Carolina Gamecocks","shortName":"South","location":"South Carolina","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2579.png","color":"#506d95"},{"id":"58","name":"South Florida Bulls","shortName":"South","location":"South Florida","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/58.png","color":"#506d95"},{"id":"2572","name":"Southern Miss Golden Eagles","shortName":"Southern","location":"Southern Miss Golden","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2572.png","color":"#506d95"},{"id":"2567","name":"SMU Mustangs","shortName":"SMU","location":"SMU","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2567.png","color":"#506d95"},{"id":"24","name":"Stanford Cardinal","shortName":"Stanford","location":"Stanford","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/24.png","color":"#506d95"},{"id":"183","name":"Syracuse Orange","shortName":"Syracuse","location":"Syracuse","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/183.png","color":"#506d95"},{"id":"2628","name":"TCU Horned Frogs","shortName":"TCU","location":"TCU Horned","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2628.png","color":"#506d95"},{"id":"218","name":"Temple Owls","shortName":"Temple","location":"Temple","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/218.png","color":"#506d95"},{"id":"2633","name":"Tennessee Volunteers","shortName":"Tennessee","location":"Tennessee","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2633.png","color":"#506d95"},{"id":"251","name":"Texas Longhorns","shortName":"Texas","location":"Texas","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/251.png","color":"#506d95"},{"id":"245","name":"Texas A&M Aggies","shortName":"Texas","location":"Texas A&M","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/245.png","color":"#506d95"},{"id":"326","name":"Texas State Bobcats","shortName":"Texas","location":"Texas State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/326.png","color":"#506d95"},{"id":"2641","name":"Texas Tech Red Raiders","shortName":"Texas","location":"Texas Tech Red","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2641.png","color":"#506d95"},{"id":"2649","name":"Toledo Rockets","shortName":"Toledo","location":"Toledo","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2649.png","color":"#506d95"},{"id":"2653","name":"Troy Trojans","shortName":"Troy","location":"Troy","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2653.png","color":"#506d95"},{"id":"2655","name":"Tulane Green Wave","shortName":"Tulane","location":"Tulane Green","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2655.png","color":"#506d95"},{"id":"202","name":"Tulsa Golden Hurricane","shortName":"Tulsa","location":"Tulsa Golden","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/202.png","color":"#506d95"},{"id":"5","name":"UAB Blazers","shortName":"UAB","location":"UAB","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/5.png","color":"#506d95"},{"id":"2116","name":"UCF Knights","shortName":"UCF","location":"UCF","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2116.png","color":"#506d95"},{"id":"26","name":"UCLA Bruins","shortName":"UCLA","location":"UCLA","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/26.png","color":"#506d95"},{"id":"41","name":"UConn Huskies","shortName":"UConn","location":"UConn","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/41.png","color":"#506d95"},{"id":"2433","name":"ULM Warhawks","shortName":"ULM","location":"ULM","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2433.png","color":"#506d95"},{"id":"113","name":"UMass Minutemen","shortName":"UMass","location":"UMass","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/113.png","color":"#506d95"},{"id":"2439","name":"UNLV Rebels","shortName":"UNLV","location":"UNLV","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2439.png","color":"#506d95"},{"id":"30","name":"USC Trojans","shortName":"USC","location":"USC","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/30.png","color":"#506d95"},{"id":"254","name":"Utah Utes","shortName":"Utah","location":"Utah","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/254.png","color":"#506d95"},{"id":"328","name":"Utah State Aggies","shortName":"Utah","location":"Utah State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/328.png","color":"#506d95"},{"id":"2638","name":"UTEP Miners","shortName":"UTEP","location":"UTEP","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2638.png","color":"#506d95"},{"id":"2636","name":"UTSA Roadrunners","shortName":"UTSA","location":"UTSA","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2636.png","color":"#506d95"},{"id":"238","name":"Vanderbilt Commodores","shortName":"Vanderbilt","location":"Vanderbilt","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/238.png","color":"#506d95"},{"id":"258","name":"Virginia Cavaliers","shortName":"Virginia","location":"Virginia","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/258.png","color":"#506d95"},{"id":"259","name":"Virginia Tech Hokies","shortName":"Virginia","location":"Virginia Tech","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/259.png","color":"#506d95"},{"id":"154","name":"Wake Forest Demon Deacons","shortName":"Wake","location":"Wake Forest Demon","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/154.png","color":"#506d95"},{"id":"264","name":"Washington Huskies","shortName":"Washington","location":"Washington","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/264.png","color":"#506d95"},{"id":"265","name":"Washington State Cougars","shortName":"Washington","location":"Washington State","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/265.png","color":"#506d95"},{"id":"277","name":"West Virginia Mountaineers","shortName":"West","location":"West Virginia","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/277.png","color":"#506d95"},{"id":"98","name":"Western Kentucky Hilltoppers","shortName":"Western","location":"Western Kentucky","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/98.png","color":"#506d95"},{"id":"2711","name":"Western Michigan Broncos","shortName":"Western","location":"Western Michigan","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2711.png","color":"#506d95"},{"id":"275","name":"Wisconsin Badgers","shortName":"Wisconsin","location":"Wisconsin","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/275.png","color":"#506d95"},{"id":"2751","name":"Wyoming Cowboys","shortName":"Wyoming","location":"Wyoming","logo":"https://a.espncdn.com/i/teamlogos/ncaa/500/2751.png","color":"#506d95"}];
 
-        const data = await response.json();
-
-        const entries =
-            data.sports?.[0]?.leagues?.[0]?.teams || [];
-
-        collegeTeams = entries.map(entry => {
-            const team = entry.team;
-
-            return {
-                id: String(team.id),
-                name: team.displayName,
-                shortName: team.name,
-                location: team.location,
-                logo: team.logos?.[0]?.href ||
-                    "https://a.espncdn.com/i/teamlogos/ncaa/500/" +
-                    team.id + ".png",
-                color: team.color
-                    ? "#" + team.color.replace("#", "")
-                    : "#506d95"
-            };
-        });
-
-        collegeTeams.sort((a, b) =>
-            a.name.localeCompare(b.name)
-        );
-
-        teamsLoaded = collegeTeams.length > 0;
-
-        if (!teamsLoaded) {
-            throw new Error("No college teams returned");
-        }
-
-        displayRankings();
-
-    } catch (error) {
-        console.error("College team loading error:", error);
-        teamsLoaded = false;
-
-        // Cards remain editable when the directory
-        // becomes available after a reload.
-        displayRankings();
-    }
+function loadCollegeTeams() {
+    collegeTeams = embeddedCollegeTeams;
+    collegeTeams.sort((a, b) => a.name.localeCompare(b.name));
+    teamsLoaded = true;
+    displayRankings();
 }
 
 function saveRankings() {
@@ -681,7 +698,7 @@ function showTeamResults(index, input, menu) {
         const message = document.createElement("div");
         message.className = "no-results";
         message.textContent =
-            "College teams could not be loaded. Refresh to retry.";
+            "Team directory unavailable. Please refresh.";
         menu.appendChild(message);
         menu.classList.add("open");
         return;
@@ -700,7 +717,7 @@ function showTeamResults(index, input, menu) {
         return team.name.toLowerCase().includes(query) ||
             team.shortName.toLowerCase().includes(query) ||
             team.location.toLowerCase().includes(query);
-    }).slice(0, 12);
+    });
 
     if (matches.length === 0) {
         const message = document.createElement("div");
@@ -836,6 +853,53 @@ function setRankingSize(size) {
     displayRankings();
 }
 
+
+function copyPreviousWeek() {
+    if (currentWeek === 1) { alert("Week 1 has no previous week."); return; }
+    const previous = localStorage.getItem("college_rankings_" + currentSeason + "_week_" + (currentWeek - 1));
+    if (!previous) { alert("No saved rankings for the previous week."); return; }
+    if (!confirm("Copy the previous week's rankings into this week? This replaces the current week's selections.")) return;
+    rankings = JSON.parse(previous);
+    saveRankings(); displayRankings();
+}
+function sortAlphabetically() {
+    if (!confirm("Sort selected teams alphabetically?")) return;
+    const filled = rankings.slice(0, rankingSize).filter(Boolean)
+        .sort((a,b) => (getTeam(a)?.name || "").localeCompare(getTeam(b)?.name || ""));
+    rankings.splice(0, rankingSize, ...filled, ...Array(rankingSize - filled.length).fill(null));
+    saveRankings(); displayRankings();
+}
+function downloadBackup() {
+    saveRankings();
+    const data = {type:"college-power-rankings-backup",version:1,currentSeason,currentWeek,rankingSize,weeks:{}};
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (/^college_rankings_\d{4}_week_\d{1,2}$/.test(key)) {
+            data.weeks[key] = JSON.parse(localStorage.getItem(key));
+        }
+    }
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+    const link=document.createElement("a"); link.href=url;
+    link.download="College-Power-Rankings-Backup.json";
+    document.body.appendChild(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+async function restoreBackup(event) {
+    const input=event.target;
+    const file=input.files?.[0];
+    if(!file)return;
+    try {
+        const data=JSON.parse(await file.text());
+        if (data.type !== "college-power-rankings-backup" || data.version !== 1 || !data.weeks || typeof data.weeks !== "object") throw new Error("Invalid college backup file.");
+        const entries=Object.entries(data.weeks);
+        if (!entries.length || entries.some(([key,value]) => !/^college_rankings_\d{4}_week_(?:[1-9]|1[0-8])$/.test(key) || !Array.isArray(value) || value.length !== 25 || value.some(id => id !== null && typeof id !== "string"))) throw new Error("Invalid rankings in backup.");
+        if(!confirm("Restore " + entries.length + " saved college week(s)? Existing matching weeks will be overwritten."))return;
+        for (const [key,value] of entries) localStorage.setItem(key,JSON.stringify(value));
+        rankings=loadRankings(); displayRankings(); alert("College rankings restored.");
+    } catch(error) { alert("Could not restore backup: " + error.message); }
+    finally { input.value=""; }
+}
+
 function nextWeek() {
     if (currentWeek >= 18) return;
 
@@ -891,6 +955,718 @@ function changeSeason() {
     displayRankings();
 }
 
+
+function generateGraphic() {
+    const chosen = rankings.slice(0, rankingSize);
+    if (chosen.every(id => !id)) {
+        alert("Add at least one team before generating a graphic.");
+        return;
+    }
+
+    const graphicWindow = window.open("", "_blank");
+
+    if (!graphicWindow) {
+        alert("Please allow pop-ups to view your graphic.");
+        return;
+    }
+
+    function getMovementValue(teamId, currentRank) {
+        if (!teamId || currentWeek === 1) return null;
+
+        const previousKey =
+            "college_rankings_" + currentSeason + "_week_" + (currentWeek - 1);
+
+        let previousRankings;
+
+        try {
+            previousRankings = JSON.parse(localStorage.getItem(previousKey));
+        } catch (error) {
+            return null;
+        }
+
+        if (!Array.isArray(previousRankings)) return null;
+
+        const oldIndex = previousRankings.indexOf(teamId);
+        if (oldIndex < 0) return null;
+
+        return (oldIndex + 1) - currentRank;
+    }
+
+    function createChevronSVG(direction, index) {
+        const isUp = direction === "up";
+        const rotation = isUp ? "" : "rotate(180 18 18)";
+        const id = "gradient" + index + direction;
+
+        const colors = isUp
+            ? ["#e4ffe9", "#71ef98", "#1bc455", "#087c31", "#03451d"]
+            : ["#ffe3e3", "#ff9090", "#f43139", "#a60b1c", "#56000b"];
+
+        return `
+            <svg class="double-chevron" viewBox="0 0 36 36" aria-hidden="true">
+                <defs>
+                    <linearGradient id="${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="${colors[0]}"/>
+                        <stop offset="22%" stop-color="${colors[1]}"/>
+                        <stop offset="48%" stop-color="${colors[2]}"/>
+                        <stop offset="75%" stop-color="${colors[3]}"/>
+                        <stop offset="100%" stop-color="${colors[4]}"/>
+                    </linearGradient>
+                </defs>
+
+                <g transform="${rotation}">
+                    <path
+                        d="M18 2 L34 18 L28.5 18 L18 7.5 L7.5 18 L2 18 Z"
+                        fill="url(#${id})"
+                        stroke="${isUp ? "#b7ffc8" : "#ffc1c1"}"
+                        stroke-width="1.2"
+                        stroke-linejoin="round"
+                    />
+                    <path
+                        d="M18 18 L34 34 L28.5 34 L18 23.5 L7.5 34 L2 34 Z"
+                        fill="url(#${id})"
+                        stroke="${isUp ? "#b7ffc8" : "#ffc1c1"}"
+                        stroke-width="1.2"
+                        stroke-linejoin="round"
+                    />
+                </g>
+            </svg>
+        `;
+    }
+
+    function renderMovement(change, index) {
+        if (change > 0) {
+            return `
+                <div class="movement-plate up">
+                    ${createChevronSVG("up", index)}
+                    <span class="movement-number">${change}</span>
+                </div>
+            `;
+        }
+
+        if (change < 0) {
+            return `
+                <div class="movement-plate down">
+                    ${createChevronSVG("down", index)}
+                    <span class="movement-number">${Math.abs(change)}</span>
+                </div>
+            `;
+        }
+
+        if (change === 0) {
+            return `
+                <div class="movement-plate same">
+                    <span class="movement-dash">—</span>
+                </div>
+            `;
+        }
+
+        return `<div class="movement-plate empty"></div>`;
+    }
+
+    const columnCount = rankingSize === 10 ? 1 : 5;
+    const graphicWidth = rankingSize === 10 ? 980 : 1200;
+    const columns = Array(columnCount).fill("");
+
+    // School-color accents for the compact Top 10 rows; keep Top 25 unchanged.
+    const schoolColors = {
+        "61":"#ba0c2f", "333":"#9e1b32", "194":"#bb0000", "84":"#990000",
+        "59":"#b3a369", "251":"#bf5700", "245":"#500000", "2483":"#007030",
+        "87":"#002b5c", "145":"#142c52", "201":"#841617", "99":"#461d7c",
+        "57":"#0021a5", "52":"#782f40", "2":"#0c2340", "30":"#990000",
+        "26":"#2774ae", "66":"#c8102e", "197":"#ff7300", "228":"#f56600",
+        "213":"#041e42", "150":"#012169", "258":"#232d4b", "259":"#861f41",
+        "264":"#4b2e83", "275":"#c5050c", "2306":"#512888", "2305":"#0051ba",
+        "183":"#d44500", "239":"#154734", "252":"#002e5d", "9":"#8c1d40",
+        "12":"#003366", "127":"#000000", "238":"#161616", "356":"#13294b"
+    };
+
+    chosen.forEach(function(teamId, index) {
+        const rank = index + 1;
+        const team = teamId ? getTeam(teamId) : null;
+        const change = getMovementValue(teamId, rank);
+        const teamColor = team?.color || "#233b5c";
+        const teamName = team?.name || "";
+        const logoUrl = team?.logo || "";
+
+        const rowColor = schoolColors[teamId] || (team?.color && team.color !== "#506d95" ? team.color : "#244263");
+        const escapedName = teamName.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        // Subtle contrasting edge only on logos that disappear against their school color.
+        const outlineTeams = new Set(["333", "84", "251", "99", "201", "245", "194"]);
+        const logoFilter = outlineTeams.has(String(teamId))
+            ? "drop-shadow(1px 0 0 rgba(255,255,255,.9)) drop-shadow(-1px 0 0 rgba(255,255,255,.9)) drop-shadow(0 1px 0 rgba(255,255,255,.9)) drop-shadow(0 -1px 0 rgba(255,255,255,.9)) drop-shadow(0 2px 2px rgba(0,0,0,.4))"
+            : "drop-shadow(0 0 1.3px rgba(255,255,255,.8)) drop-shadow(0 2px 2px rgba(0,0,0,.45))";
+        const card = rankingSize === 10 ? `
+            <div class="team-card compact-team" style="background-color:${rowColor}">
+                <div class="compact-rank">${rank}</div>
+                <div class="compact-logo-area">
+                    <div class="compact-logo-badge">
+                        ${logoUrl ? `<img class="compact-logo" src="${logoUrl}" crossorigin="anonymous" alt="" data-outline="${outlineTeams.has(String(teamId)) ? "true" : "false"}" style="filter:${logoFilter}">` : ""}
+                    </div>
+                </div>
+                <div class="compact-team-name">${escapedName || "—"}</div>
+                <div class="compact-movement">${renderMovement(change, index)}</div>
+            </div>
+        ` : `
+            <div class="team-card" style="background-color: ${teamColor};">
+                ${logoUrl ? `
+                    <img class="team-logo" src="${logoUrl}" crossorigin="anonymous" alt="${escapedName} logo">
+                ` : ""}
+                <div class="card-overlay">
+                    <div class="rank-plate"><span class="rank-number">${rank}</span></div>
+                    ${renderMovement(change, index)}
+                </div>
+            </div>
+        `;
+
+        const columnIndex = index % columnCount;
+        columns[columnIndex] += card;
+    });
+
+    const columnMarkup = columns.map(content => `<div class="column">${content}</div>`).join("");
+
+
+    graphicWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>College Football Power Rankings - Week ${currentWeek}</title>
+
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&display=swap" rel="stylesheet">
+
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
+
+            <style>
+                * {
+                    box-sizing: border-box;
+                }
+
+                body {
+                    margin: 0;
+                    padding: ${rankingSize === 10 ? "12px 14px" : "20px"};
+                    background: #05070c;
+                    font-family: Arial, Helvetica, sans-serif;
+                    overflow-x: hidden;
+                }
+
+                .download-controls {
+                    text-align: center;
+                    margin-bottom: 25px;
+                }
+
+                #downloadButton {
+                    background: #1f2937;
+                    color: white;
+                    border: 1px solid #475569;
+                    border-radius: 8px;
+                    padding: 14px 30px;
+                    font-size: 16px;
+                    font-weight: 800;
+                    cursor: pointer;
+                }
+
+                #downloadButton:hover {
+                    background: #334155;
+                }
+
+                #downloadButton:disabled {
+                    opacity: 0.6;
+                    cursor: wait;
+                }
+
+                .preview-wrapper {
+                    position: relative;
+                    width: 100%;
+                    margin: 0 auto;
+                }
+
+                .graphic-container {
+                    width: ${graphicWidth}px;
+                    margin: 0;
+                    background: #05070c;
+                    border-radius: 16px;
+                    overflow: hidden;
+                    box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+                    border: 1px solid #1f2937;
+                    transform-origin: top left;
+                }
+
+                .header {
+                    position: relative;
+                    overflow: hidden;
+                    background: linear-gradient(
+                        135deg,
+                        #05070c 0%,
+                        #10203c 50%,
+                        #05070c 100%
+                    );
+                    color: white;
+                    text-align: center;
+                    padding: ${rankingSize === 10 ? "14px 18px 10px" : "24px 20px 18px"};
+                    border-bottom: 3px solid #334155;
+                }
+
+                .header-content {
+                    position: relative;
+                    z-index: 2;
+                }
+
+                .header h1 {
+                    margin: 0;
+                    font-family: "Teko", Arial, sans-serif;
+                    font-size: ${rankingSize === 10 ? 55 : 72}px;
+                    font-weight: 700;
+                    letter-spacing: ${rankingSize === 10 ? 1 : 3}px;
+                    line-height: 0.95;
+                    color: #f8fafc;
+                    text-transform: uppercase;
+                    text-shadow: 0 3px 10px rgba(0,0,0,0.45);
+                }
+
+                .header-week {
+                    margin-top: 8px;
+                    font-family: "Teko", Arial, sans-serif;
+                    font-size: ${rankingSize === 10 ? 30 : 40}px;
+                    font-weight: 600;
+                    letter-spacing: 2px;
+                    line-height: 1;
+                    color: #cbd5e1;
+                    text-transform: uppercase;
+                    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+                }
+
+                .content {
+                    padding: ${rankingSize === 10 ? "12px 14px" : "20px"};
+                    background: #05070c;
+                }
+
+                .columns {
+                    display: grid;
+                    grid-template-columns: repeat(${columnCount}, minmax(0, 1fr));
+                    gap: 14px;
+                }
+
+                .column {
+                    display: flex;
+                    flex-direction: column;
+                    gap: ${rankingSize === 10 ? 3 : 12}px;
+                    min-width: 0;
+                }
+
+                .team-card {
+                    height: ${rankingSize === 10 ? 86 : 160}px;
+                    position: relative;
+                    overflow: hidden;
+                    border-radius: 9px;
+                    border: 2px solid rgba(255,255,255,0.10);
+                    box-shadow:
+                        0 4px 7px rgba(0,0,0,0.25),
+                        inset 0 1px 0 rgba(255,255,255,0.15);
+                }
+
+                .team-logo {
+                    position: absolute;
+                    width: ${rankingSize === 10 ? 132 : 180}px;
+                    height: ${rankingSize === 10 ? 132 : 180}px;
+                    left: 50%;
+                    top: 59%;
+                    transform: translate(-50%, -50%) scale(${rankingSize === 10 ? 1 : 1.12});
+                    object-fit: contain;
+                    opacity: 1;
+                    z-index: 1;
+                    filter: drop-shadow(0 4px 7px rgba(0,0,0,0.20));
+                }
+
+                .card-overlay {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    z-index: 5;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    pointer-events: none;
+                }
+
+                .rank-plate {
+                    width: 59px;
+                    height: 50px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #0f172a;
+                    color: white;
+                    border-right: 3px solid #475569;
+                    border-bottom: 3px solid #475569;
+                    border-radius: 0 0 7px 0;
+                    box-shadow:
+                        3px 4px 7px rgba(0,0,0,0.42),
+                        inset 0 2px 0 rgba(255,255,255,0.12);
+                }
+
+                .rank-number {
+                    font-size: 33px;
+                    font-weight: 900;
+                    line-height: 1;
+                    color: #ffffff;
+                    text-shadow: 0 2px 3px rgba(0,0,0,0.65);
+                }
+
+                .movement-plate {
+                    height: 50px;
+                    min-width: 82px;
+                    padding: 5px 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 5px;
+                    background: #0f172a;
+                    border-left: 3px solid #475569;
+                    border-bottom: 3px solid #475569;
+                    border-radius: 0 0 0 7px;
+                    box-shadow:
+                        -3px 4px 7px rgba(0,0,0,0.42),
+                        inset 0 2px 0 rgba(255,255,255,0.12);
+                }
+
+                .double-chevron {
+                    width: 33px;
+                    height: 33px;
+                    flex-shrink: 0;
+                    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.6));
+                }
+
+                .movement-number {
+                    font-size: 25px;
+                    font-weight: 900;
+                    line-height: 1;
+                    text-shadow: 0 2px 3px rgba(0,0,0,0.6);
+                }
+
+                .movement-plate.up .movement-number {
+                    color: #60ed8e;
+                }
+
+                .movement-plate.down .movement-number {
+                    color: #ff626e;
+                }
+
+                .movement-dash {
+                    font-size: 28px;
+                    font-weight: 900;
+                    color: #b9c4d4;
+                    line-height: 1;
+                }
+
+                .movement-plate.empty {
+                    visibility: hidden;
+                }
+
+                /* Top 10: compact horizontal rows inspired by the supplied example. */
+                .compact-team {
+                    height: 76px;
+                    display: flex;
+                    align-items: stretch;
+                    border: 0;
+                    border-radius: 3px;
+                    box-shadow: none;
+                    overflow: hidden;
+                }
+                .compact-rank {
+                    width: 75px;
+                    flex: 0 0 75px;
+                    background: #05070c;
+                    color: #fff;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 36px;
+                    font-weight: 900;
+                }
+                .compact-logo-area {
+                    flex: 0 0 176px;
+                    height: 76px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: visible;
+                }
+                /* No separate logo tile: display the logo directly on the team row. */
+                .compact-logo-badge {
+                    width: 166px;
+                    height: 76px;
+                    flex-shrink: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: none;
+                    border: none;
+                    border-radius: 0;
+                    overflow: visible;
+                }
+                .compact-logo {
+                    display: block;
+                    width: auto;
+                    height: auto;
+                    max-width: 160px;
+                    max-height: 72px;
+                    object-fit: contain;
+                    flex-shrink: 0;
+                    filter: drop-shadow(0 0 1.3px rgba(255,255,255,0.8))
+                            drop-shadow(0 2px 2px rgba(0,0,0,0.45));
+                }
+                .compact-team-name {
+                    min-width: 0;
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    color: #fff;
+                    font-weight: 800;
+                    font-size: 29px;
+                    line-height: 1;
+                    text-shadow: 0 1px 3px #0008;
+                }
+                .compact-movement {
+                    flex: 0 0 91px;
+                    background: #071224b5;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .compact-movement .movement-plate {
+                    height: 76px;
+                    min-width: 91px;
+                    width: 91px;
+                    border: 0;
+                    border-radius: 0;
+                    background: transparent;
+                    box-shadow: none;
+                }
+                .compact-movement .movement-plate.empty { visibility: visible; }
+            </style>
+        </head>
+
+        <body>
+
+            <div class="download-controls">
+                <button id="downloadButton" onclick="downloadGraphic()" disabled>
+                    Preparing image...
+                </button>
+            </div>
+
+            <div class="preview-wrapper" id="previewWrapper">
+                <div class="graphic-container" id="graphic">
+
+                    <div class="header">
+
+                        <div class="header-content">
+                            <h1>COLLEGE FOOTBALL POWER RANKINGS</h1>
+                            <div class="header-week">Week ${currentWeek}</div>
+                        </div>
+
+                    </div>
+
+                    <div class="content">
+                        <div class="columns">
+${columnMarkup}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <script>
+                const graphic = document.getElementById("graphic");
+                const previewWrapper = document.getElementById("previewWrapper");
+                const mobileApple = /iPhone|iPad|iPod/.test(navigator.userAgent);
+                let preparedFile = null;
+                let preparedBlobUrl = null;
+
+                function resizePreview() {
+                    const availableWidth = document.body.clientWidth - 40;
+                    const originalWidth = ${graphicWidth};
+
+                    const scale = Math.min(
+                        1,
+                        availableWidth / originalWidth
+                    );
+
+                    graphic.style.transform = "scale(" + scale + ")";
+
+                    previewWrapper.style.width =
+                        (originalWidth * scale) + "px";
+
+                    previewWrapper.style.height =
+                        (graphic.offsetHeight * scale) + "px";
+                }
+
+                window.addEventListener("resize", resizePreview);
+                resizePreview();
+
+                async function prepareGraphic() {
+                    const button = document.getElementById("downloadButton");
+
+                    try {
+                        if (document.fonts && document.fonts.ready) {
+                            await document.fonts.ready;
+                        }
+
+                        if (typeof html2canvas === "undefined") {
+                            throw new Error(
+                                "The PNG export library did not load."
+                            );
+                        }
+
+                        await Promise.all(
+                            Array.from(graphic.querySelectorAll("img")).map(img => {
+                                if (img.complete) {
+                                    return Promise.resolve();
+                                }
+
+                                return new Promise(resolve => {
+                                    img.addEventListener("load", resolve, { once: true });
+                                    img.addEventListener("error", resolve, { once: true });
+                                });
+                            })
+                        );
+
+                        // html2canvas does not reliably export CSS drop-shadow filters.
+                        // Bake the contrasting edge into the logo pixels before exporting,
+                        // then restore the original logos so the live preview stays unchanged.
+                        const restoredLogos = [];
+                        if (${rankingSize} === 10) {
+                            for (const img of graphic.querySelectorAll(".compact-logo[data-outline='true']")) {
+                                if (!img.complete || !img.naturalWidth) continue;
+                                try {
+                                    const bounds = img.getBoundingClientRect();
+                                    const w = Math.max(1, Math.round(bounds.width));
+                                    const h = Math.max(1, Math.round(bounds.height));
+                                    const scale = 3;
+                                    const canvasLogo = document.createElement("canvas");
+                                    canvasLogo.width = w * scale;
+                                    canvasLogo.height = h * scale;
+                                    const context = canvasLogo.getContext("2d");
+                                    context.scale(scale, scale);
+
+                                    // Create a crisp white silhouette from the logo alpha.
+                                    const silhouette = document.createElement("canvas");
+                                    silhouette.width = canvasLogo.width;
+                                    silhouette.height = canvasLogo.height;
+                                    const mask = silhouette.getContext("2d");
+                                    mask.scale(scale, scale);
+                                    mask.drawImage(img, 0, 0, w, h);
+                                    mask.globalCompositeOperation = "source-in";
+                                    mask.fillStyle = "rgba(255,255,255,0.95)";
+                                    mask.fillRect(0, 0, w, h);
+
+                                    for (const [dx, dy] of [[-2,0],[2,0],[0,-2],[0,2],[-1.5,-1.5],[1.5,-1.5],[-1.5,1.5],[1.5,1.5]]) {
+                                        context.drawImage(silhouette, dx, dy, w, h);
+                                    }
+                                    context.drawImage(img, 0, 0, w, h);
+
+                                    const originalSrc = img.src;
+                                    const originalFilter = img.style.filter;
+                                    img.style.width = w + "px";
+                                    img.style.height = h + "px";
+                                    img.style.filter = "none";
+                                    img.src = canvasLogo.toDataURL("image/png");
+                                    restoredLogos.push({ img, originalSrc, originalFilter });
+                                } catch (error) {
+                                    console.warn("Could not pre-render logo outline:", error);
+                                }
+                            }
+                        }
+
+                        await Promise.all(restoredLogos.map(({img}) => img.decode().catch(() => {})));
+                        const previousTransform = graphic.style.transform;
+                        graphic.style.transform = "none";
+
+                        try {
+                            const canvas = await html2canvas(graphic, {
+                                scale: 2,
+                                backgroundColor: "#05070c",
+                                useCORS: true,
+                                allowTaint: false,
+                                logging: false,
+                                width: graphic.offsetWidth,
+                                height: graphic.offsetHeight,
+                                windowWidth: ${graphicWidth + 60}
+                            });
+
+                            const blob = await new Promise(resolve => {
+                                canvas.toBlob(resolve, "image/png");
+                            });
+
+                            if (!blob) {
+                                throw new Error("Could not generate PNG.");
+                            }
+
+                            preparedFile = new File(
+                                [blob],
+                                "College-Football-Power-Rankings-Week-${currentWeek}.png",
+                                { type: "image/png" }
+                            );
+
+                            preparedBlobUrl = URL.createObjectURL(blob);
+
+                        } finally {
+                            graphic.style.transform = previousTransform;
+                            for (const {img, originalSrc, originalFilter} of restoredLogos) {
+                                img.src = originalSrc;
+                                img.style.filter = originalFilter;
+                                img.style.width = "";
+                                img.style.height = "";
+                            }
+                        }
+
+                        button.disabled = false;
+                        button.textContent = mobileApple ? "Save Image" : "Download PNG";
+
+                    } catch (error) {
+                        console.error(error);
+                        button.textContent = "Image unavailable";
+                        alert(
+                            "Could not prepare the graphic. Check the browser console."
+                        );
+                    }
+                }
+
+                async function downloadGraphic() {
+                    if (!preparedFile) return;
+
+                    if (mobileApple && navigator.canShare?.({ files: [preparedFile] })) {
+                        try {
+                            await navigator.share({ files: [preparedFile] });
+                        } catch (error) {
+                            if (error.name !== "AbortError") {
+                                alert("Could not share image: " + error.message);
+                            }
+                        }
+                        return;
+                    }
+
+                    const link = document.createElement("a");
+                    link.download = preparedFile.name;
+                    link.href = preparedBlobUrl;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                }
+
+                prepareGraphic();
+            <\/script>
+
+        </body>
+        </html>
+    `);
+
+    graphicWindow.document.close();
+}
+
 // Close search results when clicking elsewhere.
 document.addEventListener("pointerdown", event => {
     if (!event.target.closest(".team-picker")) {
@@ -903,6 +1679,7 @@ document.addEventListener("pointerdown", event => {
 
 displayRankings();
 loadCollegeTeams();
+if (window.lucide) lucide.createIcons();
 </script>
 
 </body>
